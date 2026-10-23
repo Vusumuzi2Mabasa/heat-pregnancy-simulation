@@ -1,288 +1,359 @@
-# Genetic susceptibility and molecular responses to heat during pregnancy
+# Heat exposure, maternal and mental health: a joint Bayesian simulation
 
-A prospective maternal-infant study in South Africa: simulation report and grant-development directions
+Genetic susceptibility and transcriptomic mediation in a purpose-built prospective South African study
 
-Prepared for Vusi | 23 October 2026 | Version 1.1
+Prepared for Vusi | 23 October 2026 | Version 2.0
 
-Design update: Appendix A develops the expanded maternal physical and mental health question, Bayesian joint modelling and the conditional role of Genomic SEM. The completed simulation remains a clinical and expression design exercise; it contains no mental-health outcomes or Bayesian fits.
+## SIMULATED DATA - NOT EMPIRICAL FINDINGS
 
-## SYNTHETIC STUDY - DESIGN EVIDENCE ONLY
+All weather, participants, outcomes, genotypes and expression measures are generated. No real participants were recruited. No susceptibility gene, clinical risk estimate or South African climate trend has been discovered. The model tests recovery of deliberately imposed effects and the sensitivity of conclusions to assumptions.
 
-Every participant, weather observation, genotype, expression feature and clinical outcome in the results is computer-generated. No participants were recruited and no programme data were accessed. These results cannot establish biological associations, identify susceptibility genes, or describe actual South African climate trends.
+## What was completed
 
-## Executive finding
+The new cohort contains 600 synthetic women, four paired molecular/outcome visits per woman, and 86 generated later pregnancy complications. A Bayesian model jointly fits vascular, depression and anxiety trajectories and the binary complication endpoint. Three four-chain fits assess the base model, wider priors and module measurement error. The report also includes residual-confounding sensitivity and a separate 500-feature transcriptomic scan.
 
-The demonstration generated 1,500 pregnancies, retained 1,341, and generated 152 binary preterm outcomes (11.3%). A nested molecular simulation included 300 women and 900 visits. These are realised outputs of assumed data-generating mechanisms, not estimates of population prevalence.
+## Principal numerical result
 
-Across 300 repetitions per condition, the nominal interaction detection rate at 1,500 recruits was 21.3% with exposure-error SD 0; 13.3% with exposure-error SD 0.6. This supports treating genomic interaction discovery as a conditional or expansion aim rather than an assured deliverable.
+For a hypothetical +1 SD heat shift, the population-average depression indirect effect is 0.177 (0.141, 0.217) standardised units. The complication indirect effect is 3.64 (0.83, 7.09) percentage points. These estimates are conditional on the assumed model and no unmeasured mediator-outcome confounding.
 
-## Recommended grant architecture
+## How the result should inform the grant
 
-Begin with Dr Glory Chidumwa's spatiotemporal exposure question. Use an exposure atlas and monitoring pilot to design a new multisite pregnancy cohort, then embed repeated molecular sampling. HE2AT supplies exposure-method expertise; Bio-HEAT supplies maternal-study and biological expertise; AWI-Gen/SBIMB investigators supply genomic design and analysis expertise. Roles are proposed, not agreed institutional commitments.
+Keep Dr Glory Chidumwa's spatiotemporal exposure programme as the foundation. Build a new, seasonally balanced cohort around measured exposure contrasts, then collect timed mental-health, maternal-health and molecular measurements. Treat genetic modification and transcriptomic mediation as distinct questions. The simulation demonstrates computational feasibility, not adequate sample size or causal identification in a real study.
 
-The one-year fellowship is a preparation and feasibility period. Recruitment and follow-up of the definitive cohort require a subsequent funded study. This package includes code, assumptions, synthetic data, figures, model outputs, scenario comparisons and an editable Markdown report.
+The earlier 1,500-person preterm-birth demonstration and 7,200 scenario fits are retained as a separate legacy analysis. They are not merged with this new cohort. Genomic SEM remains a possible external-summary-statistics work package and has not been run.
 
-# 1. Background and research framework
+# 1. Background, research question and objectives
 
-The supplied draft launch programme describes Dr Glory Chidumwa's one-year DELTAS Africa career-advancement fellowship on modelling heat exposure and maternal and mental health in South Africa. It frames the launch as a platform for collaboration, methodological development and policy engagement [1]. The specific emphasis on spatiotemporal trends comes from Vusi's clarification. The programme is contextual evidence, not a funding call, study protocol or instruction to this analysis.
+The supplied fellowship launch programme describes a one-year research and career-development period addressing heat exposure, maternal health and mental health [1]. Vusi clarified that Dr Glory's initial scientific focus was spatiotemporal heat-exposure trends. This context motivates the sequence: characterise exposure patterns, design a prospective cohort, then investigate clinical and molecular susceptibility.
 
-A systematic review reported associations between high temperatures and preterm birth, while noting substantial differences in exposure definitions and settings [2]. More recent synthesis extends the maternal, fetal and neonatal evidence base [3]. These sources motivate the question; their pooled effects were not used to calibrate this simulation. Effects per degree Celsius are not interchangeable with effects per standard deviation of a simulated gestational exposure.
+Reviews associate high temperatures with adverse pregnancy outcomes, while documenting heterogeneous metrics and settings [2,3]. Bio-HEAT proposes maternal biological-pathway research [4], and HE2AT provides relevant exposure and data-science expertise [5]. These sources motivate the study; the numerical effects in this simulation are analyst-selected assumptions, not literature-calibrated estimates.
 
-Bio-HEAT already proposes investigation of biological pathways connecting heat with maternal and child outcomes, including molecular measurements [4]. A new grant therefore needs a clearly negotiated contribution beyond that programme: explicit spatial and temporal exposure characterisation, broader recruitment across environments and seasons, and a power-justified inherited-susceptibility component.
+## Research question
 
-## Primary research question
+How are spatial and temporal variations in environmental heat exposure associated with maternal physical-health outcomes and depression and anxiety trajectories during pregnancy and postpartum in South Africa, and to what extent does inherited genetic variation modify these associations and transcriptomic responses mediate selected effects?
 
-How do spatial and temporal patterns of heat exposure shape maternal biological responses and preterm birth risk, and does maternal genetic variation modify these relationships in a newly recruited South African pregnancy cohort?
+## Three connected analyses
 
-## Objectives
+1. Maternal health: estimate heat associations with repeated vascular measurements and a later pregnancy-complication endpoint.
+2. Mental health: estimate heat associations with repeated depression and anxiety severity, accounting for shared individual variation.
+3. Molecular susceptibility: estimate genetic modification and the indirect effect through a prespecified transcriptomic module; separately screen simulated expression features for heat associations.
 
-1. Characterise historical and prospective spatial, seasonal and short-term heat variation at candidate recruitment sites.
-2. Estimate associations between prospectively measured heat exposure and preterm birth.
-3. Characterise within-person transcriptomic and inflammatory responses to heat.
-4. Evaluate genetic modification of heat-associated responses where power permits.
-5. Translate exposure and susceptibility evidence into a feasible research and prevention agenda.
+## Interpretive boundaries
 
-## Scope
+The vascular outcome is a standardised blood-pressure-like trait. Depression and anxiety are continuous severity surrogates, not questionnaire scores or diagnoses. The binary endpoint represents a synthetic hypertensive-complication liability; it is not a validated clinical classification. Inherited genotype modifies associations; it is not a mediator of environmental heat. The mediator is a simulated normalised expression module, not an identified gene or pathway.
 
-Maternal mental health is retained as an optional secondary module, subject to local priorities and clinical referral capacity. It is not simulated here. The infant component in this version concerns birth outcomes; infant genomics, childhood development and long-term follow-up are not implied.
-
-# 2. Methodology: simulation design
-
-| Element | Generating assumption |
-| --- | --- |
-| Weather | Daily maximum temperature for 2010-2030; 3 fictional sites, 6 neighbourhoods/site; site baselines 24, 27, 29 C; neighbourhood offsets in 0.35 C increments. |
-| Time structure | Seasonal cosine amplitude 5 C; warming 0.04 C/year; shared AR(1) weather noise with rho 0.65 and innovation SD 1.7 C; site-day noise SD 0.7 C. |
-| Pregnancy exposure | Synthetic conception dates in 2027-2029; mean daily maximum temperature over gestational days 98-139, standardised against an 18,000-record source pool. Future dates are fictional, not forecasts. |
-| Genetics | One fictitious allele dosage (0,1,2), frequency logit(p)=logit(0.30)+0.20*PC. PC is an observed synthetic ancestry proxy. Dosage is centred at 0.6. |
-| Clinical mechanism | Binary logistic outcome: intercept -2.25; heat log(1.25); genotype 0.10; heat x genotype log(1.15); age 0.15; deprivation 0.20; PC 0.10; site index 0.08; conception-season sine 0.10. |
-| Observation | 90% retention, independent of all other variables; primary exposure error SD 0.4 on the standardised scale. Scenario errors: 0 or 0.6. |
-| Molecular mechanism | 300 retained women, 3 scheduled samples (14,20,26 weeks), 500 normalised expression surrogates; 25 features have a heat coefficient 0.30. No genetic interaction is injected in expression. |
-
-The simulation conditions on pregnancies ongoing at 20 weeks and uses a binary later preterm indicator. It does not generate delivery dates, losses, stillbirths or competing risks. All molecular visits are assumed observed; early delivery-related missing samples are not represented. Consequently this exercise tests components of the design, not a complete causal pregnancy model.
-
-Seed: 20261023. Clinical scenarios use a separate fixed random stream. The site labels are abstract and have no real coordinates. No map is presented as a real spatial risk surface.
-
-# 3. Methodology: estimation and operating characteristics
-
-## Spatiotemporal analysis
-
-Site-level annual mean maximum temperatures were regressed on calendar year. Intervals use HC3 heteroskedasticity-robust standard errors and a t reference distribution. Monthly site averages illustrate seasonal and spatial contrast. Spatial dependence is simplified to common weather and fixed site/neighbourhood offsets; a spatial Gaussian process, heatwave detection and trend-break estimation are not implemented.
-
-## Clinical estimation
-
-Logistic models include heat, centred allele dosage, their interaction, age, deprivation, ancestry proxy, site indicators and sine/cosine conception season. Models compare true exposure (an unavailable oracle in real research) with error-contaminated assigned exposure. Odds ratios use Wald 95% intervals. The heat coefficient is evaluated at centred genotype zero; it is not an overall population risk ratio. Interaction is a ratio of heat odds ratios per extra synthetic allele.
-
-## Molecular estimation
-
-Seven-day presampling mean temperatures generate visit-level heat exposures. Expression includes participant random intercepts (SD 0.7), independent residual noise (SD 1), gestational-stage coefficient 0.12, cell-proxy coefficient 0.18 and batch coefficient 0.10. Within-person demeaning removes subject intercepts. Regression includes heat, heat x genotype, gestational stage, cell proxy and batch; cluster-robust intervals account for repeated visits. Heat tests use t distributions with 299 degrees of freedom and Benjamini-Hochberg adjustment across 500 features at q<0.05.
-
-These are continuous expression surrogates, not RNA-seq counts. There is no gene annotation, pathway enrichment, expression quantitative-trait-locus analysis or causal mediation analysis. No biological gene names can be inferred from the synthetic feature labels.
-
-## Monte Carlo evaluation
-
-Twenty-four scenarios cross 600, 1,500 and 3,000 recruits; exact exposure or error SD 0.6; and four effect settings: heat OR 1.25 with interaction OR 1.00, 1.15 or 1.30, plus a global heat null (both ORs 1.00). Each scenario has 300 repetitions with 10% independent loss. Outcomes include nominal rejection, interaction rejection at 5e-8, bias, coverage and fit failures.
-
-Monte Carlo standard error is sqrt[p(1-p)/R]; its maximum is 2.9 percentage points at R=300. Error bars show +/-1.96 MCSE, not confidence limits for a population effect. Three hundred repetitions cannot characterise a genome-wide null false-positive probability. The 5e-8 calculation assesses a single injected variant against that threshold, not genome-wide discovery power.
-
-# 4. Results: simulated exposure and clinical outcomes
+# 2. Spatiotemporal exposure and prospective sampling
 
 ![Simulation figure](results/01_spatiotemporal.png)
 
-Estimated synthetic warming slopes were Site 1: 0.038 C/year (95% interval 0.018 to 0.057), Site 2: 0.040 C/year (95% interval 0.023 to 0.057), Site 3: 0.039 C/year (95% interval 0.021 to 0.058). The exercise recovers a trend deliberately built into the generator; it provides no evidence of actual local warming rates.
+The extension reuses the synthetic daily climate field: 2010-2030, three fictional sites, six neighbourhoods per site, a 5 C seasonal amplitude, a 0.04 C/year imposed trend and correlated weather noise. The figure describes the generator, not observed South African conditions. Site baselines are 24, 27 and 29 C; neighbourhood offsets are 0.35 C apart.
 
-![Simulation figure](results/02_clinical.png)
+## Exposure-to-sample-to-outcome order
 
-| Exposure model | Term | OR (95% interval) | p |
-| --- | --- | --- | --- |
-| Oracle exposure | Heat | 1.85 (0.84-4.05) | 0.124 |
-| Oracle exposure | Heat x allele | 1.20 (0.94-1.54) | 0.15 |
-| Assigned exposure | Heat | 1.15 (0.78-1.69) | 0.486 |
-| Assigned exposure | Heat x allele | 1.17 (0.93-1.47) | 0.186 |
-
-The retained synthetic cohort had 152 events among 1341 pregnancies. One realisation is illustrative; the repeated-simulation analysis provides the design evidence.
-
-# 5. Results: synthetic molecular responses
-
-![Simulation figure](results/03_molecular.png)
-
-Of 25 deliberately heat-responsive expression features, 22 were detected at q<0.05. There were 0 discoveries among the 475 null features. Realised sensitivity was 88.0%; the realised false-discovery proportion was 0.0%. These are results from one synthetic expression matrix, not repeated-simulation estimates of FDR control or molecular power.
-
-## What this demonstration establishes
-
-Repeated sampling can be represented in a workflow that separates within-person exposure variation from stable participant characteristics. The analysis can recover injected expression effects under favourable assumptions and produces auditable feature-level estimates and multiple-testing adjustments.
-
-## What it does not establish
-
-The simulation does not identify real heat-responsive genes or a biological pathway. Strong molecular detection can arise because the imposed effects are relatively large, all scheduled visits are available, cell composition is represented by a simple observed covariate and expression features are independent. Real RNA-seq data have count dispersion, library-size variation, gene correlation and technical failures that require additional modelling.
-
-## Design implication
-
-A nested molecular study is a plausible mechanism-focused work package, but 300 women is an illustrative budget scenario rather than a justified final sample size. A pilot must estimate RNA quality, variance, within-person correlation, usable heat contrasts, sequencing depth and visit completion before molecular power is calculated. The real study should retain participants with incomplete visits and use methods appropriate to the missingness mechanism.
-
-# 6. Results: sample size and exposure error
-
-![Simulation figure](results/04_design.png)
-
-| Recruited N | Error SD | Heat test | Interaction .05 | Interaction 5e-8 |
-| --- | --- | --- | --- | --- |
-| 600 | 0.0 | 9.0% | 7.3% | 0.0% |
-| 600 | 0.6 | 4.0% | 11.3% | 0.0% |
-| 1500 | 0.0 | 10.7% | 21.3% | 0.0% |
-| 1500 | 0.6 | 5.3% | 13.3% | 0.0% |
-| 3000 | 0.0 | 13.3% | 34.0% | 0.0% |
-| 3000 | 0.6 | 5.7% | 31.7% | 0.0% |
-
-Table: rejection rates under heat OR 1.25 and interaction OR 1.15. Rates reflect the assumed source population, seasonal adjustment, allele distribution, event model and retention. The complete 24-scenario results include bias and coverage.
-
-With no interaction, nominal interaction rejection ranged from 3.7% to 6.3%. Under the global heat null, heat rejection ranged from 3.3% to 6.7%. Total convergence failures: 0 across 7,200 fits.
-
-Exposure error affects both estimated coefficients and the interaction signal. Adjustment for site and season removes much of the constructed heat variation, so nominal cohort size alone is an inadequate measure of information. These calculations do not select a definitive recruitment target.
-
-# 7. Discussion and limitations
-
-## Preserve the spatiotemporal foundation
-
-Dr Glory's original direction should be the organising first aim. Mapping when and where exposure varies can guide recruitment, sensor placement and sampling schedules. A climate atlas can be a substantive fellowship output before a pregnancy cohort exists. Linking that atlas to a purpose-built cohort supplies the transition from environmental description to biological susceptibility research.
-
-## Separate exposure response from inherited susceptibility
-
-The expression model and clinical genetic-interaction model answer different questions. Heat-associated expression changes need not be inherited and need not mediate birth outcomes. Genetic modification of a clinical association requires adequate independent participants and events; adding repeated expression samples does not replace those participants. The new grant should avoid a broad promise to discover genomic determinants unless the design is powered for that task.
-
-## Interpret the simulation as a stress test
-
-The findings follow from assumptions chosen by the analyst. They are useful for identifying sensitivity to sample size and exposure measurement, not for confirming the proposed biology. The assumed clinical odds ratios and warming rate are not empirical estimates. The source pool is reused across repetitions; results are conditional on its weather realisation rather than averaging over independently simulated climates.
-
-## Important simplifications
-
-Only one common variant is simulated, with no linkage disequilibrium, imputation error, rare variation, relatedness or unmeasured ancestry. Independent loss to follow-up, exact covariate measurement and a correct logistic model are favourable assumptions. The simulation omits correlated clinical outcomes within clinics, mobility, humidity, air pollution, infection, treatment changes, socioeconomic measurement error and non-linear lag effects. It also omits fetal loss and exposure-dependent delivery timing. Bias and coverage under exposure error are reported, but missing-not-at-random and population-structure sensitivity remain future work.
-
-## Next simulation iteration
-
-Use real exposure variance from an environmental pilot, without requiring existing AWI-Gen participants. Simulate time-to-delivery with gestational risk sets, heat-dependent attrition, genotype frequency/ancestry scenarios, correlated expression counts and batch failures. Evaluate alternative sampling budgets and sensor calibration strategies. Increase repetitions for final precision and verify the analysis with an independent statistical implementation.
-
-# 8. Directions for the grant: purpose-built study
-
-## Work package 1: exposure atlas and validation
-
-Under Dr Glory's scientific leadership, characterise observed historical trends, seasonal heat burden and neighbourhood contrasts at candidate sites. HE2AT would lead exposure methods. Combine appropriate reanalysis and station observations with local monitoring; ERA5-Land is a potential background data source, not a household-level measurement [5,6]. Prespecify heat metrics, percentile reference periods and heatwave definitions. Validate predictions using held-out locations and dates, and quantify uncertainty. The simulation has not downloaded or analysed these real weather data.
-
-## Work package 2: prospective maternal-infant cohort
-
-Recruit a new cohort early in pregnancy at sites chosen for clinical feasibility and exposure contrast, ideally across at least two seasonal cycles. The 1,500-person scenario is a budgeting anchor only. Establish ultrasound-supported gestational dating where feasible; ascertain spontaneous and medically indicated preterm delivery separately, and define management of stillbirth and pregnancy loss. Prespecify a clinical primary endpoint. Collect residential histories, mobility, housing, occupation, cooling, hydration, infection, medication, antenatal conditions and relevant social factors.
-
-## Work package 3: repeated molecular substudy
-
-Use a prespecified, site- and season-balanced subgroup with baseline and repeated blood sampling. Coordinate samples with personal/household monitoring; add an ethically acceptable heat-event sampling strategy if feasible. Record time of day, gestational stage, cell counts, sample handling and laboratory batch. Collect maternal DNA once; preserve RNA appropriately. Use validated RNA-seq quality-control and repeated-measures analysis, with a replication plan and separate power assessment.
-
-## Work package 4: susceptibility and synthesis
-
-SBIMB/AWI-Gen investigators would lead population-genetic design and analysis expertise. Use newly collected DNA, not AWI-Gen participant records. Decide between a justified focused interaction analysis and a larger discovery collaboration after power assessment. Integrate clinical and molecular results cautiously; reserve mediation claims for temporally ordered data and explicit causal assumptions. Validate findings in an independent cohort before risk prediction or clinical application.
-
-## Partnership responsibilities
-
-Proposed: Dr Glory - scientific integration and spatiotemporal leadership; HE2AT - exposure modelling and environmental data engineering; Bio-HEAT investigators - maternal recruitment, biological sampling and mechanistic expertise; SBIMB/AWI-Gen investigators - genomic methods and governance. Agree ownership, analytic leadership, access, authorship and overlap with ongoing studies before submission. No partner endorsement is claimed.
-
-# 9. Fellowship roadmap and funding decisions
-
-| Period | Deliverable and decision |
+| Stage | Synthetic timing and purpose |
 | --- | --- |
-| Months 1-3 | Agree distinct aims and collaborators; select candidate sites; review ethics and consent needs; obtain environmental data access; define primary estimand and endpoint. |
-| Months 4-6 | Produce preliminary observed exposure atlas; test sensors and sample logistics; obtain recruitment and laboratory quotes; estimate exposure and biological variance. |
-| Months 7-9 | Run recalibrated power simulations; assess recruitment, retention and molecular feasibility; choose core and expansion aims; prepare analysis and data-management plans. |
-| Months 10-12 | Complete protocol, work packages, costed budget, governance agreements, partner letters and funding application. |
+| Baseline | Genotype, ancestry proxy, age, deprivation, baseline distress, site and fictional conception date. New cohort; no AWI-Gen participant records. |
+| Heat exposure | Seven-day mean daily Tmax immediately preceding each molecular sample; standardised over the new cohort's visits. |
+| Molecular samples | Gestational weeks 14, 20 and 26, plus nominal six weeks postpartum. |
+| Repeated outcomes | Vascular, depression and anxiety outcomes one week after each sample. |
+| Clinical endpoint | A later complication ascertained by nominal term delivery. Predictors use only the first three antenatal exposures and modules. |
 
-## Feasibility gates
+All women are assumed to remain pregnant through the last antenatal pair and to deliver at day 280; postpartum sampling is day 322. No delivery-time or competing-risk model is fitted. All visits and assays are complete. This deliberate simplification permits a transparent mediation test, but excludes early preterm delivery, fetal loss and delivery-dependent missingness.
 
-Proceed with a definitive cohort only if recruitment capacity, usable exposure variation and clinical event information meet prespecified targets. Proceed with transcriptomics only if sample quality and repeat-visit completion justify the cost. Keep genome-wide interaction discovery as an expansion aim unless the required sample size and replication partners are secured. Set numeric go/no-go thresholds with the investigators before the pilot, rather than deriving them after seeing pilot results.
+# 3. Methodology: generating the joint data
 
-## Budget architecture
+| Component | Assumption |
+| --- | --- |
+| Cohort | 600 women; balanced fictional sites; 4 visits each. Conception dates span 2027-2028. These are synthetic future dates, not forecasts. |
+| Genotype | One fictional diploid allele; logit allele frequency = logit(0.30) + 0.20*ancestry. Dosage centred at 0.6. |
+| Mediator | Normal expression module with heat coefficient 0.40, heat x genotype 0.12 and residual SD 0.70. Covariates and visit indicators also enter. |
+| Vascular / depression / anxiety | Direct heat coefficients: 0.18 / 0.15 / 0.12. Module coefficients: 0.30 / 0.40 / 0.35. Direct heat x genotype: 0.08 / 0.06 / 0.05. Residual SD: 0.65 / 0.80 / 0.75. |
+| Shared variation | Correlated participant random intercepts. Covariance diagonal 0.49, 0.64, 0.49; off-diagonal 0.21, 0.14, 0.32. |
+| Complication | Probit intercept -1.35; heat 0.20; module 0.35; heat x genotype 0.10; shared vascular-intercept loading 0.65. Probit residual variance fixed at 1. |
+| Measured confounders | Age, deprivation, ancestry proxy, baseline distress, site and seasonal harmonics; visit indicators for repeated measures. Complete coefficient vectors saved in generating_truth.json. |
 
-Cost clinical staff and tracking, ultrasound/outcome ascertainment, environmental sensors and calibration, genotyping, RNA extraction and sequencing, storage and transport, bioinformatics, computing, community engagement, governance and contingency. Obtain unit costs before selecting the molecular fraction. For illustration, 300 women at three visits imply up to 900 RNA libraries before QC losses or repeat assays; that arithmetic is not a cost estimate.
+The same heat series drives module expression and both outcome domains. The module precedes the outcomes. At generation, mediator errors are independent of participant effects and outcome errors: the base case has no residual mediator-outcome confounding. Outcome errors are conditionally independent across time and domains; correlated participant intercepts create dependence.
 
-## Governance and participant value
+A separate 500-feature normalised-expression matrix is generated for the exploratory scan. Its features are not used to select the mediator. This avoids outcome-guided mediator selection, but also means the simulation does not validate how a real expression module would be discovered or measured.
 
-Develop consent for genomic testing, storage, future use and controlled sharing; secure location and genomic data separately with role-based access. Agree results-return and incidental-finding policies with local ethics and clinical teams. Establish community input and safe procedures for heat symptoms and mental-health referrals if that module is included. The private GitHub repository contains synthetic data only and is not proposed as a repository for identifiable study records.
+# 4. Methodology: Bayesian joint model and priors
 
-## Submission framing
+## Model structure
 
-Describe the present work as preliminary simulation-based design evaluation. Do not list synthetic associations as pilot biological findings. The funding narrative is strongest when it explains how spatiotemporal evidence improves cohort design, how repeated samples address mechanisms, and how genomic ambitions are matched to statistical information. No specific funding call or eligibility criteria have been verified.
+M(i,t) = X(i,t)*a + eM(i,t).
+Y(k,i,t) = X(i,t)*B(k) + bM(k)*M(i,t) + u(k,i) + eY(k,i,t).
+Pr[C(i)=1] = Phi[Z(i)*c + loading*u(vascular,i)].
+u(i) follows a three-dimensional normal distribution with covariance D.
 
-# 10. Sources, provenance and reproducibility
+X contains heat, centred genotype, their interaction, baseline covariates, site, season and visit indicators. Z contains antenatal-average heat, module and corresponding baseline covariates; redundant visit indicators are omitted. Phi is the standard normal cumulative distribution. Shared vascular effects connect the complication endpoint to the longitudinal likelihood; correlated D connects maternal and mental outcomes. This is a fitted joint likelihood, not three separate regressions relabelled as joint.
 
-[1] DELTAS Africa II Career Advancement Fellowship. Draft Fellowship Research Programme Launch: Modelling of Heat Exposure and Maternal and Mental Health in South Africa. Dr Glory Chidumwa. 22 October 2026. User-supplied PDF; contextual source only. Original not redistributed in this repository.
+## Priors and computation
 
-[2] Chersich MF et al. Associations between high temperatures in pregnancy and risk of preterm birth, low birth weight, and stillbirths: systematic review and meta-analysis. BMJ 2020;371:m3811. https://doi.org/10.1136/bmj.m3811
+Longitudinal and probit regression slopes have independent Normal(0,1) priors; intercepts have Normal(0,2) priors. Continuous residual variances have inverse-gamma(shape=3, scale=2) priors. D has an inverse-Wishart(df=5, scale=0.5 I) prior. The mediator uses a normal-inverse-gamma prior: residual variance IG(3,2), a conditional on that variance distributed Normal(0, variance*I). These are regularising assumptions on standardised scales, not established clinical priors.
+
+Blocked Gibbs sampling uses exact Gaussian, inverse-gamma and inverse-Wishart conditionals and truncated-normal probit augmentation. Each fit uses four dispersed chains, 1,500 warmup iterations and 2,000 retained draws per chain. The wider-prior fit doubles regression prior SDs while retaining variance/covariance priors. The assay-error fit adds SD 0.5 noise to the measured module and naively refits the original model.
+
+## Diagnostics
+
+Rank-normalised folded split R-hat, bulk ESS, tail ESS and mean Monte Carlo SE are calculated with ArviZ Stats for every population parameter and all participant effects. Targets are R-hat<1.01 and bulk/tail ESS>400. Trace plots and prior/posterior predictive checks complement these diagnostics [8,9]. Gibbs sampling has no HMC divergences, treedepth or BFMI diagnostic; those are not reported as zero.
+
+# 5. Methodology: mediation and sensitivity estimands
+
+## Effect definition
+
+The contrast is an additive +1 SD shift in each relevant heat exposure, retaining observed baseline covariates. For repeated outcomes, direct and indirect effects are calculated at each genotype and averaged over the empirical genotype distribution. With no heat-module interaction in the outcome model, the indirect effect is [a(heat)+a(heat x G)*G] multiplied by the module coefficient. The direct effect includes the outcome heat x genotype term.
+
+For complications, the shift applies only to antenatal exposures. Natural direct and indirect effects are computed by posterior standardisation of probit probabilities, integrating over mediator residuals and new-participant vascular effects. Results are risk differences, not products of probit coefficients. The specified decomposition is direct = R(1,M0)-R(0,M0), indirect = R(1,M1)-R(1,M0), total = their sum. No proportion-mediated estimate is emphasised.
+
+## Residual-confounding sensitivity
+
+For each outcome separately, rho ranges from -0.6 to +0.6 and represents an assumed correlation between structural mediator and outcome errors. It is not estimated. For continuous outcomes, the structural module coefficient is b(rho)=b(0)-rho*sY/[sM*sqrt(1-rho^2)]. The direct coefficient is adjusted so that the total effect remains invariant. These sensitivity-derived draws reparameterise the fitted posterior; they are not refits with new structural priors [10].
+
+For the probit endpoint, the mediator residual SD is sM/sqrt(3). Correlated-error standardisation preserves the total latent variance while reallocating direct and indirect contributions; probabilities are recomputed at each rho. Sensitivities are outcome-specific, not a simultaneous unconstrained correlation matrix across all outcomes.
+
+## Assumptions and additional checks
+
+A causal interpretation requires consistency, adequate exposure support, correct temporal order and control of exposure-outcome, exposure-mediator and mediator-outcome confounding. The base generator satisfies these by construction. Exposure-induced mediator-outcome confounders, interference and time-varying feedback are absent; the same formula would not automatically apply if they existed [11]. Wider-prior and noisy-module refits test other assumptions. Sensitivity checks do not prove that confounding is absent.
+
+# 6. Results: exposure and connected trajectories
+
+![Simulation figure](results/extended/05_joint_trajectories.png)
+
+The new synthetic cohort generated 86 complications among 600 women (14.3%). There are 2,400 observed molecular/outcome pairs. The plotted trajectories combine injected time effects, weather variation and participant heterogeneity; they do not estimate real pregnancy symptom patterns.
+
+## Spatial and temporal information
+
+The exposure standardisation uses a mean of 27.64 C and SD 4.36 C over the synthetic visit exposures. A +1 SD shift therefore corresponds to 4.36 C in this artificial field, not a transportable clinical exposure increment. Fixed site and seasonal terms are included so that associations are not simply comparisons of warmer sites with cooler sites.
+
+## Genetic modification
+
+| Response | Heat x genotype: mean (95% CrI) | Injected value |
+| --- | --- | --- |
+| vascular | 0.128 (0.080, 0.175) | 0.08 |
+| depression | 0.033 (-0.026, 0.092) | 0.06 |
+| anxiety | 0.066 (0.009, 0.122) | 0.05 |
+| Expression module | 0.136 (0.093, 0.178) | 0.12 |
+
+These are coefficients per extra fictional allele, not real loci. A lack of interval separation from zero is retained rather than interpreted as proof of no modification. Allele-specific indirect effects are available in the results CSV; no genome-wide discovery analysis was attempted.
+
+# 7. Results: direct, indirect and total effects
+
+![Simulation figure](results/extended/06_joint_effects.png)
+
+| Outcome | Total effect: mean (95% CrI) | Generating truth |
+| --- | --- | --- |
+| vascular | 0.268 (0.184, 0.350) | 0.304 |
+| depression | 0.368 (0.266, 0.470) | 0.314 |
+| anxiety | 0.299 (0.205, 0.393) | 0.263 |
+| complication | 3.52 (-5.35, 15.05) | 7.681 |
+
+Complication results are percentage-point risk differences; other outcomes use standardised units. Black crosses mark effects calculated from the generator and this cohort's covariates. Intervals describe posterior uncertainty within one synthetic dataset. Whether a generating value falls inside an interval is a recovery check, not a repeated-simulation coverage estimate.
+
+The complication total-effect interval spans zero in this realisation. A positive indirect-effect estimate under the mediation assumptions does not establish an overall clinical heat effect; direct and total clinical estimates remain imprecise. This distinction should remain visible in the grant narrative.
+
+# 8. Results: transcriptomic mediation
+
+| Outcome | Indirect effect (95% CrI) | Truth | Pr(effect>0) |
+| --- | --- | --- | --- |
+| vascular | 0.123 (0.096, 0.151) | 0.121 | 1.000 |
+| depression | 0.177 (0.141, 0.217) | 0.162 | 1.000 |
+| anxiety | 0.142 (0.111, 0.176) | 0.141 | 1.000 |
+| complication | 3.644 (0.831, 7.091) | 3.367 | 0.994 |
+
+Posterior indirect effects recover the mechanism deliberately embedded in the data under the no-residual-confounding model. This is not evidence that a transcriptomic mechanism exists in real participants. The complication estimate is obtained on the probability scale, integrating the shared vascular effect and expression variation.
+
+## Genotype-specific mediation
+
+| Fictional allele dosage | Depression indirect effect (95% CrI) | Truth |
+| --- | --- | --- |
+| 0 | 0.141 (0.105, 0.180) | 0.131 |
+| 1 | 0.198 (0.159, 0.239) | 0.179 |
+| 2 | 0.254 (0.205, 0.305) | 0.227 |
+
+The indirect effect can differ by genotype because heat x genotype is included in the mediator equation. The mediator coefficient in the outcome equation is constant in this generator. This is a specific form of moderated mediation, not an exhaustive model of genetic susceptibility.
+
+## Timing and interpretation
+
+Antennatal modules are measured before the later complication. The postpartum module contributes only to postpartum repeated outcomes. The simulation assumes complete visits, no early deliveries and no treatment-induced changes. In a real cohort, temporally ordered collection is necessary but not sufficient: illness, treatment, infection, cell composition and social adversity could confound or reverse apparent pathways.
+
+# 9. Results: Bayesian model diagnostics
+
+| Fit | Max R-hat | Min bulk ESS | Min tail ESS | Parameters |
+| --- | --- | --- | --- | --- |
+| joint | 1.0065 | 712 | 1182 | 1887 |
+| wide_prior | 1.0070 | 641 | 1292 | 1887 |
+| noisy_module | 1.0062 | 680 | 1007 | 1887 |
+
+![Simulation figure](results/extended/08_traceplots.png)
+
+All population parameters and all participant random effects are included in the diagnostic tables. Selected traces illustrate mixing; they are not the only variables checked. Quantities use 8,000 retained draws per fit. Full diagnostics, including Monte Carlo SE, are in results/extended/*_diagnostics.csv.
+
+Passing these thresholds supports numerical estimation of the specified posterior. It does not validate causal assumptions, outcome definitions, prior suitability or predictive performance outside the simulated setting. Parameter-recovery, predictive and sensitivity checks are reported separately.
+
+# 10. Results: predictive checks and validation
+
+![Simulation figure](results/extended/09_predictive_checks.png)
+
+For 15 of 15 prespecified summaries, the observed synthetic statistic lies within the central 95% new-subject posterior predictive interval. Replication generates new participant effects, modules, repeated outcomes and complications at the observed covariates. Checks include means, SDs, antenatal-to-postpartum changes and correlations across participant-average outcomes.
+
+Prior predictive simulations are also saved. They describe what the broad standardised priors allow, including extreme complication rates. They are not clinically elicited prior predictions. The real grant should calibrate priors to credible outcome ranges and pilot data before fitting.
+
+## Independent numerical checks
+
+Validation confirms the mediator posterior against its analytic normal-inverse-gamma solution, checks Gaussian precision sampling, verifies the probit probability integral using independent Monte Carlo draws, and checks the natural-effect decomposition and rho=0 sensitivity identity. It also verifies temporal ordering, exclusion of postpartum predictors from the complication model and diagnostic coverage of every participant effect.
+
+Validation status: PASS. The extension has one main synthetic cohort, not a repeated Bayesian power/coverage study. No claim of calibrated clinical prediction or 95% frequentist coverage is made.
+
+# 11. Results: sensitivity to unmeasured confounding
+
+![Simulation figure](results/extended/07_mediation_sensitivity.png)
+
+| Outcome | First nonnegative grid rho with interval reaching zero |
+| --- | --- |
+| vascular | 0.3 |
+| depression | 0.3 |
+| anxiety | 0.3 |
+| complication | 0.1 |
+
+Positive residual correlation can attribute part of the observed mediator-outcome association to unmeasured common causes, reducing the inferred indirect effect. Negative correlation can increase it. The reported crossing is limited to a 0.1-spaced grid and is not a data-estimated confounding threshold. Sensitivity-derived intervals are conditional on each fixed rho.
+
+# 12. Results: priors and transcriptomic assay error
+
+## Wider regression priors
+
+| Outcome | Base mean | Wider mean | Wider 95% CrI |
+| --- | --- | --- | --- |
+| vascular | 0.123 | 0.123 | (0.096, 0.152) |
+| depression | 0.177 | 0.178 | (0.142, 0.217) |
+| anxiety | 0.142 | 0.142 | (0.111, 0.176) |
+| complication | 3.644 | 3.516 | (0.868, 6.918) |
+
+The wider-prior fit doubles the regression prior SDs. The inverse-Wishart covariance and residual-variance priors are unchanged, so this is a targeted regression-prior check rather than a complete prior-robustness analysis.
+
+## Module measurement-error stress test
+
+| Outcome | Base mean | Noisy mean | Noisy 95% CrI |
+| --- | --- | --- | --- |
+| vascular | 0.123 | 0.074 | (0.053, 0.097) |
+| depression | 0.177 | 0.103 | (0.076, 0.134) |
+| anxiety | 0.142 | 0.093 | (0.068, 0.121) |
+| complication | 3.644 | 2.760 | (0.598, 5.529) |
+
+Independent SD 0.5 noise was added to the observed module while leaving the same weather, outcomes and participants unchanged. Conditional module reliability is 0.49/(0.49+0.25)=0.662. The original model was refitted without correcting the error. This evaluates the consequences of an imperfect assay; it is not a measurement-error-adjusted estimator.
+
+The tables use percentage points for complications and standardised units otherwise. The grant implication is to budget for RNA quality control, replicate/validation assays and reliable module measurement, and to assess confounding rather than relying on a single indirect-effect estimate.
+
+# 13. Results: exploratory transcriptomic scan
+
+A separate matrix of 500 synthetic expression features was analysed after the joint model. Twenty-five features had an injected heat coefficient of 0.30; 22 were detected at Benjamini-Hochberg q<0.05, with 1 discoveries among 475 null features. Realised sensitivity was 88.0%; realised false-discovery proportion was 4.3%. These are single-dataset quantities, not repeated-simulation FDR estimates.
+
+## Analysis method
+
+Participant demeaning removes stable differences. Regression adjusts for heat x genotype, visit effects, seasonal harmonics, a cell-composition proxy and batch. Participant-clustered standard errors address repeated observations. False-discovery adjustment applies across the 500 heat tests.
+
+## Separation from mediation
+
+The mediator module was specified before this exploratory scan and generated separately. Significant scan features were not selected and fed back into the same outcome model. The exercise therefore does not validate a gene-discovery-to-mediation pipeline. A real study should use independently defined modules, sample splitting or external validation before claiming mediation by discovered transcripts.
+
+## What remains unsimulated
+
+These data are normalised continuous expression, not RNA-seq counts. The scan omits gene-gene correlation, library-size differences, count dispersion, low-expression filtering, batch-dependent missingness and real pathway annotation. No real gene identifiers or biological enrichment claims are supplied. The genomic component is a single synthetic variant; no GWAS, polygenic-score validation, Genomic SEM or T-SEM is performed.
+
+## Genomic SEM position
+
+Genomic SEM could address shared inherited liability using suitable external GWAS summary statistics and ancestry-compatible LD information. It answers a different question from heat-induced expression mediation in this prospective cohort. Its inclusion in a grant should be conditional on data suitability and statistical precision, not justified by the current synthetic single-variant results [7].
+
+# 14. Discussion and directions for the grant
+
+## What the extension demonstrates
+
+A coherent model can connect spatiotemporal exposure, repeated maternal and mental-health measures, an expression module and a later complication endpoint. Four-chain diagnostics and numerical checks make the implementation auditable. The mediation analysis demonstrates a known mechanism under the generator, while sensitivity analyses show how interpretation changes when assumptions are relaxed.
+
+## What should change in the proposal
+
+Make spatiotemporal exposure assessment the first aim and use it to select sites, seasons, sensors and sampling windows. Define one primary clinical endpoint and one primary mental-health trajectory. Prespecify a small molecular mediator set and separate confirmatory mediation from exploratory transcriptomic discovery. Include assay validation and a realistic missing-data plan in the budget. Genetic interaction should remain power-dependent.
+
+| Partner | Proposed contribution to the new study |
+| --- | --- |
+| Dr Glory / HE2AT | Scientific integration; observed exposure trends and local validation; geospatial linkage and heat-window design. |
+| Bio-HEAT investigators | Pregnancy recruitment, repeated clinical and molecular collection, maternal-infant interpretation and laboratory logistics. |
+| AWI-Gen / SBIMB investigators | Genomic design, laboratory and population-genetic expertise using newly collected DNA; no reuse of AWI-Gen participants is assumed. |
+
+## Feasibility and scope limits
+
+The extension assumes 600 women with four complete assays: 2,400 molecular measurements before repeats/QC losses. This is not an affordable or adequately powered sample-size recommendation. A funded design may need a nested molecular subgroup, deliberate sampling weights and an appropriate missing-mediator model. Outcome instruments require local linguistic and psychometric validation. The three fictional sites do not support claims of national representativeness.
+
+# 15. Limitations, next simulations and fellowship plan
+
+## Model limitations
+
+The simulation omits real climate calibration, personal exposure, humidity, air pollution, mobility, fetal loss, preterm delivery timing, missing visits and time-varying treatment/confounding. It assumes conditionally independent mediator errors and Gaussian symptom traits. Shared random intercepts capture dependence but do not establish a causal relationship between physical and mental outcomes. Probit liability is a statistical construction, not a clinical mechanism.
+
+Only one generated cohort underpins the Bayesian recovery results. Three assumption-focused refits do not estimate statistical power, type-I error or interval coverage. Rho is not learned from these data; sensitivity intervals are derived under fixed assumptions and induced priors. Assay-error results are deliberately naive. Wider regression priors do not exhaust sensitivity to the covariance prior.
+
+## Next design simulations
+
+Calibrate exposure variance using an observed environmental pilot. Repeat the full Bayesian analysis across null/alternative mechanisms and several cohort/substudy sizes. Add gestational time-to-event outcomes, outcome-dependent dropout, count-based correlated expression, mediator selection, imperfect ancestry control, spatial correlation and personal-exposure error. Compare the joint model against separately fitted outcomes before claiming an efficiency gain.
+
+| Fellowship period | Deliverable |
+| --- | --- |
+| Months 1-3 | Agree partners and distinct aims; define clinical/mental endpoints and estimands; identify candidate sites and environmental access. |
+| Months 4-6 | Observed spatiotemporal atlas; sensor and sample-handling pilot; recruitment and assay quotations; consent and governance design. |
+| Months 7-9 | Recalibrated joint-model power simulations; molecular-substudy design; missingness and mediation sensitivity plans. |
+| Months 10-12 | Costed protocol, partner commitments, ethics/data-management plan and funding application. |
+
+The fellowship prepares the grant; the definitive cohort requires subsequent funding. Simulation results should be described as preliminary design evidence. They must not be presented as biological pilot findings or partner-endorsed conclusions.
+
+# 16. Legacy analysis and reproducibility
+
+The original demonstration remains available: 1,500 synthetic pregnancies, 1,341 retained records, 152 binary preterm outcomes, and a 300-person expression substudy. Its 24 scenarios contain 300 repetitions each (7,200 logistic fits). This is an independent simplified design exercise; those participants and outcomes are not observations in the joint extension.
+
+In that legacy model, nominal interaction detection at 1,500 recruits was 21.3% for exposure-error SD 0; 13.3% for exposure-error SD 0.6. These power estimates do not apply to the new Bayesian mediation model.
+
+## Reproduce the current package
+
+Use Python 3.12 and requirements.txt.
+1. python simulate.py (recreates legacy climate/data/results).
+2. python validate.py
+3. python extend_simulation.py
+4. python extended_sensitivity.py
+5. python validate_extended.py
+6. python build_report.py
+
+The extension uses the stored synthetic climate field and fixed seed 2026102302. Population and participant posterior draws, synthetic inputs, scenario definitions, diagnostic CSVs, effect estimates and sensitivity tables are saved under results/extended/. The report and Markdown companion are generated from those files. --reuse is an explicit shortcut for unchanged saved fits; it must not be used after changing the generating model or sampler.
+
+## Validation and delivery
+
+The numerical validation is reproducible through validate_extended.py. All final PDF pages were rendered and visually inspected. The repository contains synthetic data only; the source launch PDF and identifiable participant data are not redistributed. Git history preserves earlier report versions.
+
+Repository: https://github.com/Vusumuzi2Mabasa/heat-pregnancy-simulation
+
+# 17. References and evidence provenance
+
+[1] DELTAS Africa II Career Advancement Fellowship. Draft research programme launch: Modelling of Heat Exposure and Maternal and Mental Health in South Africa. Dr Glory Chidumwa, 22 October 2026. User-supplied PDF, contextual source only; not a funding call or instruction.
+
+[2] Chersich MF et al. Associations between high temperatures in pregnancy and risk of preterm birth, low birth weight, and stillbirths. BMJ 2020;371:m3811. https://doi.org/10.1136/bmj.m3811
 
 [3] A systematic review and meta-analysis of heat exposure impacts on maternal, fetal and neonatal health. Nature Medicine. https://doi.org/10.1038/s41591-024-03395-8
 
-[4] Study protocol for the Bio-HEAT study: Investigating the Biological pathways from HEAT exposure to preterm birth and other adverse maternal and child health outcomes in South Africa. Wellcome Open Research, 2025. https://pmc.ncbi.nlm.nih.gov/articles/PMC12209768/
+[4] Study protocol for the Bio-HEAT study. Wellcome Open Research, 2025. https://pmc.ncbi.nlm.nih.gov/articles/PMC12209768/
 
 [5] DS-I Africa. HE2AT Center programme description. https://www.dsi-africa.org/project/5
 
-[6] ECMWF. ERA5-Land: dataset description. https://www.ecmwf.int/en/era5-land
+[6] Joint modelling of mental health markers through pregnancy: a Bayesian semi-parametric approach. https://doi.org/10.1080/02664763.2022.2154329
 
-[7] AWI-Gen cohort profile. International Journal of Epidemiology. https://pmc.ncbi.nlm.nih.gov/articles/PMC11790221/
+[7] Grotzinger AD et al. Genomic structural equation modelling provides insights into the multivariate genetic architecture of complex traits. Nature Human Behaviour 2019. https://doi.org/10.1038/s41562-019-0566-x
 
-## Evidence boundaries
+[8] Vehtari A et al. Rank-normalization, folding, and localization: an improved R-hat for assessing convergence of MCMC. Bayesian Analysis 2021;16:667-718. https://doi.org/10.1214/20-BA1221
 
-Web sources were checked on 23 October 2026. Published programme descriptions support background and proposed expertise; they do not establish current data access, staff availability, partner commitment or funding. AWI-Gen cohort characteristics [7] informed the decision to use new recruitment rather than treat an adult population cohort as a pregnancy cohort.
+[9] ArviZ Stats. Rank-normalised R-hat and array diagnostics documentation. https://python.arviz.org/projects/stats/en/latest/api/generated/arviz_stats.rhat.html
 
-## Reproduce
-
-Install requirements.txt in a Python 3.12 environment. Run: python simulate.py; python validate.py; python build_report.py. Outputs are generated under results/ and output/pdf/. report.md is rebuilt from the same numerical files as this PDF. Runtime versions are recorded in results/software_versions.json. Full scenario parameters and coefficient definitions are in simulate.py; simulation_config.json is a generated summary, not an input configuration file.
-
-Validation compares the custom logistic solver with an independent optimiser and checks output counts, retention, multiple-testing bounds, scenario completeness and finite estimates. The report is a methodological planning document, not a submitted manuscript or a completed observational study.
-
-# Appendix A. Refined question and model choice
-
-This appendix updates the proposed grant directions after Vusi's request to integrate maternal and mental health. It supersedes the optional status of mental health in the earlier design narrative if the expanded grant is adopted. It does not change or relabel the completed simulation results.
-
-## Refined research question
-
-How are spatial and temporal variations in environmental heat exposure associated with maternal physical-health outcomes and depression and anxiety trajectories during pregnancy and postpartum in South Africa; to what extent does inherited genetic variation modify these associations, and do temporally preceding transcriptomic responses mediate selected associations?
-
-Define a small set of primary outcomes before recruitment. Distinguish maternal physical outcomes, such as incident hypertensive disorders, from perinatal outcomes such as preterm birth. Select one primary mental-health trajectory and one primary clinical endpoint; other outcomes can be secondary. Repeated symptom scores are not equivalent to clinical diagnoses.
-
-## Modification and mediation are different estimands
-
-Inherited genotype precedes the measured heat exposure. It can modify exposure-response associations, but cannot ordinarily mediate an effect of heat on health. Heat-responsive gene expression could be an intermediate process if measured after the relevant exposure and before the outcome. Expression can also reflect infection, cell composition or existing illness. A simultaneous correlation among heat, expression and symptoms does not establish mediation.
-
-## Genomic SEM: conditional supporting work package
-
-Genomic SEM models genetic covariance using GWAS summary statistics [8,9]. It could assess shared inherited liability across well-defined mental and obstetric traits if sufficiently powered, comparable GWAS and suitable linkage-disequilibrium references exist. Ancestry compatibility, phenotype definitions and uncertainty in genetic covariance require careful assessment. The new pregnancy cohort alone is not assumed to supply sufficiently precise GWAS estimates.
-
-This addresses shared genetic architecture, not whether environmental heat causes mental illness or whether measured RNA responses mediate heat effects. An individual-level structural equation model containing genotype or a polygenic score is a different analysis from the GenomicSEM framework. T-SEM uses genetically predicted expression associations and is also distinct from longitudinal heat-induced transcriptomic mediation. External summary-statistic analyses should not be presented as demonstrating the mechanism in South African pregnant women.
-
-## Preferred core framework
-
-Use a parsimonious Bayesian multivariate hierarchical model for the new cohort, with outcome-specific likelihoods and correlated participant effects. Bayesian joint modelling of physiological and mental-health markers across pregnancy has a published precedent [10]. Its feasibility here still depends on event counts, visits, exposure contrast and model complexity. Hierarchical shrinkage cannot manufacture information absent from the data.
-
-# Appendix A continued. Joint and mediation analysis
-
-## A staged Bayesian model
-
-1. Model repeated depression/anxiety scores with an appropriate continuous, ordinal or item-response likelihood; include baseline symptoms, gestational/postpartum time, heat windows, confounders and participant effects. Check measurement comparability across languages and time.
-2. Model a maternal clinical endpoint with an appropriate binary or event-time likelihood. If preterm birth is retained, model gestational time-to-delivery with delayed entry and appropriate competing outcomes, or specify a separate landmark analysis.
-3. Correlate participant-level effects or explicitly link latent longitudinal trajectories to clinical hazards. Add site effects cautiously; three sites do not support an elaborate site-level variance structure. Introduce spatial effects only with adequate neighbourhood coverage.
-
-Schematic outcome predictor: eta(k,i,t) = alpha(k) + f(k,time) + beta(k)*heat(i,t) + gamma(k)*G(i) + delta(k)*heat(i,t)*G(i) + confounders + site effects + participant effects. The participant effects are jointly distributed across outcomes. Correlation captures shared residual variation; it does not prove that one outcome causes another.
-
-## Transcriptomic mediation
-
-Begin with a few prespecified or independently validated expression modules rather than thousands of simultaneous gene mediators. Define an exposure contrast, mediator time and later outcome horizon. Fit linked mediator and outcome models, and estimate indirect effects by posterior standardisation or g-computation appropriate to the selected estimand. An expression coefficient, or attenuation of the heat coefficient after adjustment, is not by itself a causal indirect effect.
-
-Causal mediation requires defensible control of exposure-outcome, exposure-mediator and mediator-outcome confounding. Exposure-induced mediator-outcome confounders complicate natural direct/indirect effects; longitudinal g-methods or interventional effects may be more appropriate [11]. Postpartum expression cannot mediate an earlier birth outcome. Pregnancy complications can influence later mental health, so the causal role of each repeated measure must be specified by time.
-
-## Required expansion of the simulation
-
-Generate repeated mental-health outcomes and maternal physical events jointly, with known cross-outcome correlation, lagged heat effects, transcriptomic intermediates and explicit genotype interactions. Add outcome-related dropout, delivery-dependent sampling, non-linear exposure, measurement error and ancestry scenarios. Compare separate models against the joint model, evaluate mediation bias/coverage where identification holds, and perform prior predictive checks, MCMC convergence diagnostics, posterior predictive checks and prior-sensitivity analyses. These analyses have not yet been run in this package.
-
-## Additional methodological sources
-
-[8] Grotzinger AD et al. Genomic structural equation modelling provides insights into the multivariate genetic architecture of complex traits. Nature Human Behaviour 2019. https://doi.org/10.1038/s41562-019-0566-x
-
-[9] GenomicSEM official documentation. https://github.com/GenomicSEM/GenomicSEM/wiki
-
-[10] Joint modelling of mental health markers through pregnancy: a Bayesian semi-parametric approach. https://doi.org/10.1080/02664763.2022.2154329
+[10] Tingley D et al. mediation: R Package for Causal Mediation Analysis. Journal of Statistical Software 2014;59(5). https://doi.org/10.18637/jss.v059.i05
 
 [11] Bind MA et al. Causal mediation analysis for longitudinal data with exogenous exposure. Biostatistics 2016;17:122-134. https://doi.org/10.1093/biostatistics/kxv029
+
+[12] ECMWF. ERA5-Land dataset description. https://www.ecmwf.int/en/era5-land
+
+[13] AWI-Gen cohort profile. https://pmc.ncbi.nlm.nih.gov/articles/PMC11790221/
+
+Sources support scientific context and methodological choices; no published effect was used as an empirical calibration of this generator. The new Bayesian model is a transparent custom parametric implementation, not a reproduction of the semiparametric model in [6]. ERA5-Land is a potential future environmental source; no real reanalysis was analysed. Proposed institutional roles require agreement.

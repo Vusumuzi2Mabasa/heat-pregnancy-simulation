@@ -2,6 +2,26 @@
 
 All records are generated. Site numbers and neighbourhood labels do not identify actual communities.
 
+## Version 2 extension: `results/extended/`
+
+- `synthetic_longitudinal.csv`: 2,400 rows, four per woman. IDs and places are fictional. `sample_day` and `outcome_day` are offsets from 2010-01-01; outcomes occur seven days after samples. `sample_gestational_week=46` means six weeks postpartum following fixed week-40 delivery, not an ongoing 46-week pregnancy. `temperature_C` is preceding seven-day Tmax; `heat` is standardised exposure. `module` is an expression surrogate. `vascular_z`, `depression_z`, `anxiety_z` are continuous standardised traits, not diagnoses. Remaining columns form X.
+- `synthetic_clinical.csv`: later complication, ascertainment day, allele dosage and **generator-only** vascular intercept truth. This truth is not used as an observed predictor; the participant effect is inferred.
+- `analysis_inputs.npz`: X (600,4,15), W (X plus module), y (600,4,3), mediator (600,4), Z (600,13) and event (600). Z uses prenatal averages only.
+- `generating_truth.json`: seeds, true coefficients/covariances, temperature scaling and event count.
+- `{joint,wide_prior,noisy_module}_population_draws.npz`: chain x draw x parameter arrays. B includes X then module; c includes the first 12 X columns then prenatal module. a models the mediator. D, sd, sm and loading describe covariances and clinical link.
+- `*_participant_draws.npz`: b (4,2000,600,3), saved as float32; inference uses float64. Domain order: vascular, depression, anxiety.
+- `*_diagnostics.csv`: rank R-hat, bulk ESS, tail ESS and mean MCSE for 1,887 targets, including all 1,800 subject effects. Summary JSONs record thresholds/extrema.
+- `*_causal_effects.csv`: posterior means/medians, 95% equal-tail intervals, probability positive and generating truth. Continuous effects use standardised units; complications use risk differences. `population` averages empirical dosage; other rows use G=0,1,2. Truth remains the base generator in the noisy-module fit.
+- `*_mediation_sensitivity.csv`: indirect effects at fixed rho; these are posterior transformations, not fitted rho. Noisy-module sensitivities describe the naive fitted model, not a corrected latent mechanism.
+- `prior_sensitivity_comparison.csv`, `assay_error_comparison.csv`: alternative versus base estimates. `noisy_module_inputs.npz` saves the corrupted module; `assay_error_design.json` gives SD/reliability.
+- `posterior_predictive_checks.csv`: 400 new-subject replications at observed covariates, with intervals and one-sided tail proportions (not classical p values). `prior_predictive_checks.csv`: 400 prior replications.
+- `transcriptomic_scan.csv`: 500 synthetic features, true/estimated heat beta, clustered SE, p and BH q. `synthetic_expression_scan.npz`: expression (600,4,500), cell proxy and batch, separate from the prespecified mediator.
+- `validation.json`, `run_summary.json`: numerical checks and main-run metadata. Assay-error design/diagnostics are separate.
+
+## Legacy files directly under `results/`
+
+The following sections describe a different synthetic cohort retained from version 1; these are not joint-model observations.
+
 ## `synthetic_daily_weather.csv.gz`
 
 `date`: fictional daily calendar; `site`: 0-2; `neighbourhood`: 0-5; `tmax_C`: simulated daily maximum air temperature; `year`, `month`: calendar fields. Shared AR(1) weather induces dependence. No latitude or longitude is used.

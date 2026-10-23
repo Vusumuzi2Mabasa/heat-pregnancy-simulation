@@ -1,0 +1,10 @@
+{
+  "max_rhat": 1.0070216519275634,
+  "min_bulk_ess": 640.8447886829965,
+  "min_tail_ess": 1292.497433093644,
+  "parameters_checked": 1887,
+  "rhat_over_1_01": 0,
+  "bulk_below_400": 0,
+  "tail_below_400": 0,
+  "sampler": "Blocked Gibbs with exact conditionals; HMC divergences/treedepth/BFMI not applicable"
+}

@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "tests": [
+    "Temporal order and no postpartum leakage into complication predictors",
+    "Mediator draws agree with independent normal-inverse-gamma posterior moments",
+    "Gaussian precision sampling independently matches target moments",
+    "Effect decomposition and rho=0 sensitivity reproduce base estimates",
+    "Probit correlated-error sensitivity variance identity",
+    "Marginal probit integration verified by independent Monte Carlo",
+    "All three four-chain fits pass Rhat<1.01 and bulk/tail ESS>400",
+    "Transcriptomic dimensions and FDR-adjustment bounds"
+  ],
+  "diagnostics": {
+    "joint": {
+      "max_rhat": 1.0064654558037471,
+      "min_bulk_ess": 711.9512801738093,
+      "min_tail_ess": 1182.0939703166423
+    },
+    "wide_prior": {
+      "max_rhat": 1.0070216519275634,
+      "min_bulk_ess": 640.8447886829965,
+      "min_tail_ess": 1292.497433093644
+    },
+    "noisy_module": {
+      "max_rhat": 1.006202062690393,
+      "min_bulk_ess": 679.586327249679,
+      "min_tail_ess": 1007.205545355295
+    }
+  },
+  "max_mediator_mean_MC_z": 2.0492084550511454
+}

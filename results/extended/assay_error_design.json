@@ -1,0 +1,5 @@
+{
+  "added_noise_sd": 0.5,
+  "conditional_reliability": 0.6621621621621621,
+  "interpretation": "Sensitivity stress test, not an error-corrected model; same outcomes and weather, corrupted module only."
+}
