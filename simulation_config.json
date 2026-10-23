@@ -1,0 +1,15 @@
+{
+  "seed": 20261023,
+  "recruited": 1500,
+  "retention": 0.9,
+  "molecular_n": 300,
+  "genes": 500,
+  "true_heat_genes": 25,
+  "repetitions": 300,
+  "warming_C_per_year": 0.04,
+  "heat_OR": 1.25,
+  "interaction_OR": 1.15,
+  "allele_frequency_reference": 0.3,
+  "expression_effect": 0.3,
+  "statement": "ALL DATA AND EFFECT SIZES ARE SYNTHETIC ASSUMPTIONS"
+}

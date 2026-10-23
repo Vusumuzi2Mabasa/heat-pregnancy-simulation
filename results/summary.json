@@ -1,0 +1,11 @@
+{
+  "recruited": 1500,
+  "retained": 1341,
+  "preterm_events": 152,
+  "event_rate": 0.1133482475764355,
+  "tested": 500,
+  "true_positive": 22,
+  "false_positive": 0,
+  "molecular_n": 300,
+  "visits": 900
+}

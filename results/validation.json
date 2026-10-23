@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "checks": [
+    "independent BFGS logistic agreement",
+    "24 scenarios x 300 repetitions",
+    "zero fit failures",
+    "finite estimates",
+    "500 features and BH bounds",
+    "900 molecular visits",
+    "summary consistency"
+  ],
+  "maximum_coefficient_difference": 2.126387566026011e-09
+}
