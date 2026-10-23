@@ -265,5 +265,5 @@ def footer(canvas,doc):
     canvas.drawRightString(A4[0]-46,29,str(doc.page));canvas.restoreState()
 doc=SimpleDocTemplate(str(O/'heat_pregnancy_simulation_report.pdf'),pagesize=A4,rightMargin=46,leftMargin=46,topMargin=45,bottomMargin=55,title='Heat, maternal and mental health: Bayesian simulation and mediation',author='Prepared for Vusi')
 doc.build(story,onFirstPage=footer,onLaterPages=footer)
-(ROOT/'report.md').write_text('\n'.join(md),encoding='utf-8')
+# README.md is the consolidated, curated research narrative; build only the PDF.
 print(O/'heat_pregnancy_simulation_report.pdf')
