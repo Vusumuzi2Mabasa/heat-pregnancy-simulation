@@ -1,0 +1,11 @@
+{
+  "analysis_version": "longitudinal-epidemiology-v1",
+  "source_commit": "6bd0dd14d4970d18e2b5ee0fd07eee2fa31a2eee",
+  "primary_outcome": "depression_z",
+  "secondary_outcomes": ["vascular_z", "anxiety_z", "complication"],
+  "temperature_contrast_degrees_C": 5,
+  "mediation_bootstrap_replicates": 300,
+  "bootstrap_seed": 261126,
+  "data_status": "All participant, molecular, genotype, outcome and weather values are synthetic",
+  "model_policy": "Retain the original cohort; fixed adjustment sets; no stepwise selection or seed changes"
+}

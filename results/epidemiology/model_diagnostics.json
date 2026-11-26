@@ -1,0 +1,12 @@
+{
+  "clinical_converged": true,
+  "clinical_rank": 10,
+  "clinical_coefficients": 10,
+  "clinical_separation": {
+    "complete": false,
+    "quasi_or_complete": false
+  },
+  "clinical_cooks_above_4n": 64,
+  "all_primary_records_retained": true,
+  "ML_used_for_fixed_effect_tests": true
+}

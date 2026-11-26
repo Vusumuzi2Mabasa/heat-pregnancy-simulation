@@ -1,0 +1,9 @@
+| Check | Finding |
+| --- | --- |
+| Depression random intercept fit | ICC 0.45; singular: FALSE |
+| Clinical logistic fit | Converged; design rank 10 of 10 |
+| Complete or quasi separation | Absent by linear programming |
+| Heat functional form | ML spline comparison p 0.327 |
+| Age functional form | ML spline comparison p 0.066 |
+| Participant bootstrap | 300 of 300 converged resamples |
+| Influence sensitivity | Omitting five largest Cook distances: clinical heat OR 2.23 (0.70, 7.16) |

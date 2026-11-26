@@ -1,0 +1,4 @@
+"outcome","singular","participant_variance","residual_variance","ICC","convergence_messages"
+"depression",FALSE,0.597195581208637,0.742788194201805,0.445673740359815,""
+"vascular",FALSE,0.406489395061048,0.487733958712146,0.454572555442505,""
+"anxiety",FALSE,0.470644952006996,0.664105291998907,0.414756422827918,""

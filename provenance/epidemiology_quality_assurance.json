@@ -1,0 +1,37 @@
+{
+  "analysis": "longitudinal-epidemiology-v1",
+  "status": "passed",
+  "date": "2026-11-26",
+  "pages": 14,
+  "reviewed_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "native_Word_tables": 8,
+  "main_figures": 5,
+  "supplementary_figures": 4,
+  "rendering": "Packaged LibreOffice renderer attempted; LibreOffice absent. PDF exported with Microsoft Word and every page rasterised with bundled Poppler and inspected.",
+  "layout_checks": [
+    "Black title without decorative border",
+    "Equations remain native Word mathematics",
+    "All eight tables use native flextable output and visible pale borders",
+    "Table captions stay with their tables",
+    "No orphaned table header",
+    "No clipped figures text or tables",
+    "Interpretation precedes each figure",
+    "Author and synthetic data status visible"
+  ],
+  "original_scientific_files_preserved": 55
+}

@@ -1,0 +1,312 @@
+"""Generate a single research narrative from the unchanged, executed results."""
+from pathlib import Path
+import json,re
+import pandas as pd
+ROOT=Path(__file__).resolve().parent;E=ROOT/'results/extended'
+S=json.loads((E/'run_summary.json').read_text());T=json.loads((E/'generating_truth.json').read_text())
+F=pd.read_csv(E/'joint_causal_effects.csv');P=pd.read_csv(E/'joint_parameter_summary.csv')
+PR=pd.read_csv(E/'prior_sensitivity_comparison.csv');AS=pd.read_csv(E/'assay_error_comparison.csv')
+PP=pd.read_csv(E/'posterior_predictive_checks.csv');diagnostics={k:json.loads((E/f'{k}_diagnostic_summary.json').read_text()) for k in ['joint','wide_prior','noisy_module']}
+def table(headers,rows):return '\n'.join(['| '+' | '.join(headers)+' |','| '+' | '.join(['---']*len(headers))+' |']+['| '+' | '.join(map(str,r))+' |' for r in rows])
+def estimate(r,scale=1):return f'{r["mean"]*scale:.3f} ({r["lower"]*scale:.3f}, {r["upper"]*scale:.3f})'
+def effect(outcome,effect,genotype='population'):return F[(F.outcome==outcome)&(F.effect==effect)&(F.genotype==str(genotype))].iloc[0]
+def fig(file,caption):return f'![{caption}](ASSETS/{file})'
+effect_table=table(['Outcome','Direct effect 95% CrI','Indirect effect 95% CrI','Total effect 95% CrI'],[[outcome.title()]+[estimate(effect(outcome,e),100 if outcome=='complication' else 1) for e in ['direct','indirect','total']] for outcome in ['vascular','depression','anxiety','complication']])
+genotype_table=table(['Fictional allele dosage','Depression indirect effect 95% CrI','Generating value'],[[g,estimate(effect('depression','indirect',g)),f"{effect('depression','indirect',g)['truth']:.3f}"] for g in [0,1,2]])
+robust=[]
+for outcome in ['vascular','depression','anxiety','complication']:
+ scale=100 if outcome=='complication' else 1;b=effect(outcome,'indirect');p=PR[PR.parameter==f'{outcome}:indirect'].iloc[0];a=AS[(AS.outcome==outcome)&(AS.effect=='indirect')].iloc[0]
+ robust.append([outcome.title(),f"{b['mean']*scale:.3f}",f'{p.wide_mean*scale:.3f} ({p.wide_lower*scale:.3f}, {p.wide_upper*scale:.3f})',f'{a.mean_noisy*scale:.3f} ({a.lower_noisy*scale:.3f}, {a.upper_noisy*scale:.3f})'])
+robust_table=table(['Outcome','Base indirect mean','Wider prior 95% CrI','Noisy module 95% CrI'],robust)
+diag_table=table(['Model','Maximum R hat','Minimum bulk ESS','Minimum tail ESS'],[[name,f'{diagnostics[k]["max_rhat"]:.4f}',f'{diagnostics[k]["min_bulk_ess"]:.1f}',f'{diagnostics[k]["min_tail_ess"]:.1f}'] for k,name in [('joint','Base joint model'),('wide_prior','Wider regression priors'),('noisy_module','Noisy expression module')]])
+design_table=table(['Component','Specification'],[['Population','600 synthetic women; four complete visits each'],['Sampling times','Weeks 14, 20 and 26; six weeks postpartum'],['Repeated traits','Gaussian vascular, depression and anxiety surrogates'],['Mediator','Prespecified expression module sampled before each outcome'],['Genetics','One fictional diploid variant with exposure interactions'],['Complication','86 events among 600 participants; probit endpoint at fixed delivery'],['Molecular scan','500 separate synthetic features; 25 injected heat effects'],['Posterior sampling','Four chains; 1,500 warmup and 2,000 retained draws per chain']])
+body=r'''## Abstract
+
+**Background.** A proposed connection between environmental heat, maternal physical health, mental-health trajectories and molecular response requires models that distinguish repeated associations, genetic modification and mediation. This study evaluated a custom Bayesian joint model under a known synthetic mechanism.
+
+**Methods.** A cohort of 600 synthetic women contributed 2,400 visits, with an expression-module surrogate followed seven days later by vascular, depression and anxiety traits. A binary complication endpoint used antenatal exposure and mediator histories. Correlated participant intercepts linked the repeated traits, and a shared vascular intercept connected the complication likelihood. Four-chain Gibbs sampling was evaluated with rank-normalised diagnostics and predictive checks. Sensitivity analyses examined fixed residual confounding, wider regression priors and expression measurement error.
+
+**Results.** Population-average indirect effects per one-standard-deviation heat shift were 0.123 (95% credible interval 0.096–0.151) for vascular traits, 0.177 (0.141–0.217) for depression and 0.142 (0.111–0.176) for anxiety. The complication total-effect estimate was 3.52 percentage points (−5.36 to 15.05), while its indirect-effect estimate was 3.64 points (0.83–7.09). All three fits met the recorded sampling thresholds. Measurement error attenuated indirect-effect estimates, and residual-confounding sensitivity changed their interpretation. An exploratory scan selected 22 of 25 injected expression features and one null feature.
+
+**Conclusions.** The workflow recovered aspects of an assumed mechanism and quantified dependence on modelling and measurement assumptions. These are single-cohort simulation results, not clinical or biological discoveries, repeated-simulation power estimates or evidence of a joint-model efficiency advantage.
+
+## Introduction
+
+Heat exposure is relevant to pregnancy research. A systematic review found associations between higher temperatures and adverse pregnancy outcomes, including preterm birth [1]. Prospective work such as Bio-HEAT motivates investigation of possible biological pathways [2]. These sources provide context; their participant data and published effects were not used to calibrate the present generator.
+
+Physical and mental-health measurements often vary within individuals over time. A joint framework can represent that dependence while allowing a later endpoint to share information with the longitudinal process. Molecular mediation and genetic modification raise distinct questions: an expression response may be placed on an assumed exposure–outcome pathway, whereas genotype precedes exposure and may modify its association. Neither a temporal sequence nor a fitted model alone establishes a causal pathway in patient data.
+
+This study evaluated whether a transparent computational model could recover specified direct, expression-mediated and genotype-dependent effects while accounting for correlated repeated outcomes. The objectives were to implement the joint likelihood, assess posterior sampling and predictive behaviour, and examine sensitivity to residual confounding, regression priors and assay quality. The work is an independent methodological simulation. No funded cohort, institutional collaboration, patient-level discovery or geographical risk estimate is claimed.
+
+## Methods
+
+### Design and synthetic population
+
+All participants, weather, genotypes, molecular measurements and health outcomes were generated. The principal analysis used 600 women balanced across three fictional sites, with four complete observations per woman. Conception dates were sampled within 2027–2028 as synthetic calendar indices; these dates are not forecasts. A separate earlier logistic and molecular design experiment is retained under the top-level results directory and is distinguished from the joint-model cohort analysed here.
+
+DESIGN_TABLE
+
+Maternal age, deprivation, an ancestry proxy and baseline distress were generated before follow-up. Allele dosage $G_i$ followed a binomial distribution with two trials and allele frequency
+
+$$
+\operatorname{logit}(p_i)=\operatorname{logit}(0.30)+0.20A_i,\qquad g_i=G_i-0.6.
+$$
+
+Here $A_i$ is the synthetic ancestry proxy. The single variant has no real locus identifier. The design is not a GWAS, a polygenic analysis or evidence for any specific susceptibility allele.
+
+### Exposure and temporal ordering
+
+The synthetic daily weather series spanned 2010–2030, with three site baselines of 24, 27 and 29°C. It imposed a 5°C annual seasonal amplitude, a 0.04°C annual trend, a shared autoregressive component with coefficient 0.65 and innovation standard deviation 1.7°C, and site-specific daily noise with standard deviation 0.7°C. Six neighbourhood labels within each site received fixed offsets $(k-2.5)\times0.35$°C, for $k=0,\ldots,5$.
+
+These labels are categorical exposure strata. They have no latitude, longitude, distance or specified adjacency structure. No maps, spatial-autocorrelation tests or geographical hot-spot claims were added because the present data-generating mechanism does not support them. Shared weather noise describes temporal dependence and does not supply a spatial model.
+
+For each woman, module samples occurred at gestational days 98, 140 and 182 and at day 322, corresponding to six weeks postpartum under fixed day-280 delivery. Heat was the mean daily maximum temperature over the seven completed days before the module sample. Continuous outcomes were generated seven days after each sample. Across the cohort visits, exposure had mean 27.64°C and standard deviation 4.36°C; standardised heat was $H_{it}=(T_{it}-\bar T)/s_T$.
+
+The complication endpoint was ascertained at fixed delivery and used averages over the first three antenatal exposure and module measurements. Postpartum measurements entered only the postpartum repeated outcomes. All women were assumed to remain pregnant through the antenatal measurements. Early delivery, fetal loss, variable delivery timing, dropout and missing assays were not simulated. Temporal ordering is therefore internally consistent under a restrictive design rather than a demonstrated model of actual pregnancy follow-up.
+
+### Joint likelihood and generating mechanism
+
+Let $M_{it}$ denote the observed continuous expression-module surrogate and $Y_{kit}$ the repeated trait for domain $k$, corresponding to vascular, depression or anxiety measurements. The fitted structure was
+
+$$
+M_{it}=X_{it}^{\mathsf T}a+\epsilon_{Mit},\qquad
+Y_{kit}=X_{it}^{\mathsf T}B_k+\beta_{Mk}M_{it}+u_{ki}+\epsilon_{Ykit}.
+$$
+
+$$
+u_i\sim N_3(0,D),\quad \epsilon_{Mit}\sim N(0,\sigma_M^2),\quad
+\epsilon_{Ykit}\sim N(0,\sigma_k^2).
+$$
+
+The design vector $X_{it}$ contained an intercept, heat, centred genotype, heat-by-genotype interaction, age, deprivation, ancestry proxy, baseline distress, site indicators, seasonal sine and cosine terms and visit indicators. Module errors were independent of participant effects and outcome errors in the base generator. Repeated outcome errors were conditionally independent given covariates and the correlated participant intercepts. The module had no additional random intercept.
+
+The complication component used probit augmentation,
+
+$$
+C_i=\mathbb{1}(Z_i^*>0),\qquad
+Z_i^*=Z_i^{\mathsf T}c+\lambda u_{vi}+\epsilon_{Ci},\quad \epsilon_{Ci}\sim N(0,1).
+$$
+
+Here $u_{vi}$ is the participant vascular intercept. $Z_i$ contained antenatal-average predictors and module, with averaged visit indicators omitted because they were redundant. The complication observation updated $u_{vi}$ in the sampler, making the endpoint and longitudinal traits part of a shared likelihood. The correlated matrix $D$ connected the repeated outcome domains. This construction does not assert that depression or anxiety causes the complication.
+
+The module heat coefficient was 0.40, its heat-by-genotype coefficient 0.12 and its residual standard deviation 0.70. The vascular, depression and anxiety direct heat coefficients were 0.18, 0.15 and 0.12; module coefficients were 0.30, 0.40 and 0.35; and direct heat-by-genotype coefficients were 0.08, 0.06 and 0.05. Outcome residual standard deviations were 0.65, 0.80 and 0.75. Participant variation followed
+
+$$
+D=\begin{pmatrix}0.49&0.21&0.14\\0.21&0.64&0.32\\0.14&0.32&0.49\end{pmatrix}.
+$$
+
+The complication generator had intercept −1.35, heat coefficient 0.20, module coefficient 0.35, heat-by-genotype coefficient 0.10 and shared vascular loading 0.65. Additional covariate and visit coefficients, complete matrices and seed 2026102302 are recorded in results/extended/generating_truth.json. All coefficients are illustrative assumptions on the simulated scales, not estimates derived from an empirical cohort.
+
+### Priors and posterior computation
+
+Repeated-outcome and probit regression slopes had independent $N(0,1)$ priors, with $N(0,4)$ intercept priors. Continuous outcome variances had inverse-gamma priors with shape 3 and scale 2. The participant covariance had an inverse-Wishart prior with 5 degrees of freedom and scale $0.5I_3$. For the module model,
+
+$$
+\sigma_M^2\sim\operatorname{IG}(3,2),\qquad a\mid\sigma_M^2\sim N(0,\sigma_M^2I).
+$$
+
+These are regularising assumptions, not clinically elicited priors. Blocked Gibbs sampling used exact Gaussian, inverse-gamma and inverse-Wishart conditionals and truncated-normal augmentation for the probit endpoint. Four dispersed chains contributed 1,500 warmup iterations and 2,000 retained draws each. The complete implementation is in extend_simulation.py. No HMC or NUTS algorithm was used.
+
+Rank-normalised folded split $\widehat R$, bulk effective sample size, tail effective sample size and Monte Carlo standard error were evaluated for every population parameter and all 1,800 participant effects, giving 1,887 scalar targets per fit. Recorded targets were $\widehat R<1.01$ and bulk and tail ESS greater than 400 [3]. Trace plots complemented numerical diagnostics. HMC divergences, treedepth and BFMI are not applicable to this sampler. These checks assess sampling, not clinical validity or model-selection performance.
+
+### Direct and mediated contrasts
+
+The exposure contrast was a one-standard-deviation increase in heat. For centred dosage $g$, the conditional module response and continuous-outcome effects were
+
+$$
+a_H(g)=a_H+a_{HG}g,\qquad
+\operatorname{NIE}_k(g)=a_H(g)\beta_{Mk},
+$$
+
+$$
+\operatorname{NDE}_k(g)=B_{Hk}+B_{HGk}g,\qquad
+\operatorname{TE}_k(g)=\operatorname{NDE}_k(g)+\operatorname{NIE}_k(g).
+$$
+
+Effects were reported for each fictional dosage and averaged over the observed dosage frequencies. There was no exposure-by-module interaction in the outcome equations. The approach specifies a particular form of moderated mediation; it does not evaluate every possible genetic pathway.
+
+For the complication, effects were calculated on the probability scale by integrating new-participant vascular effects and averaged antenatal module residuals. The marginal probability denominator was
+
+$$
+\sqrt{1+\lambda^2D_{vv}+c_M^2\sigma_M^2/3}.
+$$
+
+For each posterior draw, $R_{00}$ represented baseline heat and its corresponding module, $R_{10}$ shifted heat while holding the baseline module, and $R_{11}$ shifted both heat and the module response. Direct, indirect and total contrasts were $R_{10}-R_{00}$, $R_{11}-R_{10}$ and $R_{11}-R_{00}$. The module residual contribution was divided by three because the endpoint used three independent antenatal module errors. Population risks averaged the empirical covariate distribution while integrating participant effects at their unconditional distribution, justified by their independence from covariates and module errors in the generator.
+
+Natural-effect interpretation requires the specified structural model, consistency, adequate exposure support and exchangeability assumptions, including no unmeasured exposure–outcome or module–outcome confounding conditional on the model. No exposure-induced module–outcome confounders or treatment feedback were simulated. These assumptions are known features of the generator; they would require substantive justification in observational research [4].
+
+### Sensitivity and exploratory expression analyses
+
+Residual-confounding sensitivity fixed an assumed correlation $\rho$ between module and outcome errors from −0.6 to 0.6. For each continuous domain, the module coefficient was reparameterised as
+
+$$
+\beta_{Mk}(\rho)=\beta_{Mk}-\frac{\rho\sigma_k}{\sigma_M\sqrt{1-\rho^2}}.
+$$
+
+The direct coefficient changed correspondingly to preserve the observed-model representation. The probit calculation used averaged module residual standard deviation $\sigma_M/\sqrt3$, conditional probit residual standard deviation 1 and the implied covariance terms. The total-variance identity was independently checked. Each outcome was examined separately; the analysis neither estimated $\rho$ nor fitted a simultaneous unrestricted residual correlation matrix.
+
+Two refits used unchanged underlying participants and outcomes. A wider-prior fit doubled regression prior standard deviations while retaining the variance and covariance priors. A measurement-error fit added independent $N(0,0.5^2)$ noise to the observed module and refitted the original model without error correction. Its conditional reliability was $0.49/(0.49+0.25)=0.662$. This was an assay-quality stress test, not a latent measurement-error model.
+
+A separate exploratory matrix contained 500 continuous normalised-expression surrogates, of which 25 had injected heat effects. Feature testing used participant demeaning, covariate adjustment, participant-clustered inference and Benjamini–Hochberg adjustment over 500 tests. The prespecified module was generated independently of this scan, so selected features were not fed back into mediation. These are continuous synthetic features, not RNA-seq counts or real gene identifiers.
+
+### Predictive and numerical checks
+
+Four hundred prior and 400 posterior predictive replications were used. Posterior replications generated new participant effects, modules, repeated traits and complications at the observed covariates. Fifteen prespecified summary statistics were compared with central predictive intervals. Predictive tail proportions are descriptive Bayesian checks, not classical p values or estimates of external diagnostic performance.
+
+Independent numerical checks covered conjugate module posterior moments, Gaussian precision sampling, marginal probit integration, direct-plus-indirect decomposition, the $\rho=0$ identity, causal timing and full diagnostic coverage. This manuscript revision used saved numerical results and did not resample the posterior or generate a spatial extension. Checksums preserve every original scientific result file; the original document remains accessible through the repository history.
+
+## Results
+
+### Exposure and repeated outcome trajectories
+
+The cohort contained 86 simulated complications among 600 women (14.3%) and 2,400 complete module–outcome pairs. Heat exposure differed between fictional sites and across visits under the imposed seasonal field. The outcome trajectories combine generated visit effects, heat, module variation and participant heterogeneity. Visit labels index module collection, with trait measurements one week later. The fourth visit represents postpartum follow-up, not an ongoing pregnancy at week 46.
+
+TRAJECTORY_FIGURE
+
+### Direct and mediated effects
+
+The continuous-outcome indirect-effect intervals were above zero in the base fit. Total-effect estimates were positive for the three continuous traits, whereas the complication total-effect interval included zero. This distinction matters: a positive indirect-effect interval does not establish a precisely estimated positive total complication effect. These are estimates from one generated cohort, not population effect estimates or repeated-simulation coverage results.
+
+EFFECT_TABLE
+
+Continuous effects are in standardised outcome units; complication effects in this table are **percentage points**. All intervals are equal-tail 95% posterior credible intervals. The source CSV and the complication panel of the figure use unscaled risk differences. Generating values in the figure support recovery assessment within this specific mechanism; they are not empirical benchmarks.
+
+EFFECT_FIGURE
+
+### Genetic modification
+
+The fitted heat-by-genotype coefficient was 0.128 (95% CrI 0.080–0.175) for vascular traits, 0.033 (−0.026 to 0.092) for depression and 0.066 (0.009–0.122) for anxiety. Their injected coefficients were 0.08, 0.06 and 0.05. The module interaction was 0.136 (0.093–0.178), compared with injected value 0.12. The depression interaction interval included zero and is retained without interpreting it as proof of no modification.
+
+Genotype-dependent depression indirect effects increased with dosage because the generator included a heat-by-genotype term in the module equation. The outcome module coefficient was constant. These findings concern one fictional variant and should not be interpreted as genetic marker discovery.
+
+GENOTYPE_TABLE
+
+### Dependence on confounding and assay assumptions
+
+Increasing the assumed positive module–outcome residual correlation reduced the inferred indirect effects. Intervals at a fixed $\rho$ are conditional posterior transformations, not estimates of the amount of unmeasured confounding. Their movement demonstrates that the mediation interpretation is sensitive to an assumption which cannot be verified from temporal ordering alone.
+
+SENSITIVITY_FIGURE
+
+The wider regression priors produced similar continuous indirect effects. Because the residual-variance and covariance priors were unchanged, this supports a limited regression-prior sensitivity statement rather than comprehensive prior robustness. Adding module noise attenuated the continuous indirect estimates in the naive refit, including a change in depression from 0.177 to 0.103. The complication indirect estimate also decreased, with substantial remaining uncertainty.
+
+ROBUSTNESS_TABLE
+
+The table reports indirect effects; base entries are posterior means and sensitivity entries are means with 95% credible intervals. Complication values are percentage points; other values use standardised trait units. Measurement error changed the observed predictor while retaining the same outcomes. It was not corrected by the refitted model.
+
+### Exploratory feature recovery
+
+The scan selected 22 of 25 injected features and one of 475 null features at BH $q<0.05$. Realised sensitivity was 88.0% and the false-discovery proportion was $1/23=4.3\%$. The latter is a single-realisation quantity and does not establish repeated-simulation false-discovery-rate control. Features have no biological gene identities, and their recovery does not independently validate the prespecified mediator.
+
+### Posterior computation
+
+All three recorded fits met the prespecified sampling thresholds across 1,887 scalar targets per fit. The base fit had maximum $\widehat R=1.0065$, minimum bulk ESS 712 and minimum tail ESS 1,182. Selected traces illustrate mixing for population parameters, while the numerical diagnostics additionally cover all participant effects. Convergence is evidence about posterior computation, not evidence that the assumed model is scientifically correct.
+
+DIAGNOSTIC_TABLE
+
+TRACE_FIGURE
+
+### Predictive checks and validation
+
+All 15 observed synthetic summaries fell within their central 95% posterior predictive intervals. The agreement concerns replications under the fitted model at the same covariates and does not represent independent test-set performance. Prior predictive complication rates were broad, with a central interval of approximately 9%–93%, showing that the priors had not been clinically elicited.
+
+PREDICTIVE_FIGURE
+
+The saved validation passed the analytic, temporal and simulation-algebra checks described in the methods. The original numerical result files were retained unchanged during this manuscript revision. Neither the predictive checks nor the validation establish frequentist coverage, out-of-sample clinical utility or superiority of the joint model over separate outcome models.
+
+## Discussion
+
+This study provides an executable example of a Bayesian joint framework linking a specified expression response, repeated maternal and mental-health traits and a later complication. Its main methodological value is the explicit separation of direct heat effects, expression-mediated contrasts and genetic modification, together with clear treatment of timing and uncertainty. The shared vascular intercept connects the complication and longitudinal likelihoods, while correlated intercepts represent dependence between repeated outcome domains.
+
+The continuous indirect effects were recovered as positive under the base generator, but this result was partly built into the experiment through nonzero module and outcome coefficients and independent base-case errors. It is a recovery assessment, not an empirical discovery of a biological pathway. The complication result was less precise, illustrating why a plausible indirect pathway and an imprecise total effect can coexist in a modest cohort with 86 events. The analysis should not be modified merely to make every interval exclude zero.
+
+The sensitivity results place substantive limits on interpretation. Wider regression priors had little influence on several continuous indirect effects, yet assumed residual confounding and module noise altered the mediated estimates. Stable MCMC sampling cannot compensate for an incorrect mediation assumption or an unreliable assay. In a real study, cell composition, treatment, illness severity and social adversity could jointly influence molecular measurements and outcomes; measuring a module before a trait would not remove those threats by itself.
+
+Several design limitations restrict transfer to patients. Follow-up assumes fixed term delivery, complete measurements and no fetal loss, despite the clinical importance of delivery-dependent observation. Physical and mental outcomes are Gaussian standardised surrogates rather than validated diagnoses or symptom instruments. Expression lacks realistic gene correlation, count distributions and biological annotation. Only one fictional genotype was analysed. The mediator was prespecified, so no strategy for discovering and independently validating a molecular module was evaluated. The model is custom and parametric; it is not a reproduction of an established semiparametric method.
+
+The Bayesian results arise from one cohort and a small set of sensitivity refits. There is no repeated Bayesian simulation establishing power or coverage and no comparison demonstrating an efficiency advantage over separate models. The earlier logistic design experiment remains a separate resource and cannot supply those missing properties. Although the weather generator includes categorical site and neighbourhood offsets, no geographic geometry or spatial dependence model was specified. Maps or spatial test statistics would therefore add unsupported geographic meaning to the current study and were deliberately excluded.
+
+An empirical extension would require defined clinical endpoints, validated exposure windows, reliable assays, appropriate follow-up and a prespecified identification strategy. Cohort-specific spatial analysis would additionally require legitimate geographic information and an explicit scientific question, such as exposure misclassification or residual geographic confounding, with appropriate privacy controls. Those requirements concern future study design and have not been satisfied by assigning labels to synthetic neighbourhoods.
+
+## Conclusion
+
+The joint Bayesian workflow can represent a known synthetic connection between heat, an expression-module surrogate, repeated maternal and mental-health traits and a later complication. Positive indirect effects in the base fit depend on the generator and its mediation assumptions; sensitivity analyses reveal the importance of confounding and measurement quality. Sampling and predictive checks support implementation in this example, while substantial limitations prevent clinical, biological or geographic claims. The study is a reproducible methodological demonstration requiring further simulation and independent data before scientific generalisation.
+
+## Data and code availability
+
+All data are synthetic. Original cohort files, parameter draws, effect estimates, diagnostics and predictive checks remain in results/extended; the earlier independent experiment remains directly under results. The source code and manuscript are maintained together. No actual patient records, reanalysis climate observations or geocoded communities were used. No institutional collaboration or endorsement is implied.
+
+The manuscript draws from unchanged saved fits. The result-preservation manifest records checksums and the original commit, while the manuscript validation records consistency checks. Full regeneration of the analyses remains available through the original simulation scripts. The consolidated Word and PDF reports and Quarto source are linked at the start of the README. This report has not undergone journal peer review.
+
+## References
+
+1. Chersich MF and colleagues. Associations between high temperatures in pregnancy and risk of preterm birth, low birth weight, and stillbirths. BMJ 2020;371:m3811. https://doi.org/10.1136/bmj.m3811
+2. Solarin I and colleagues. Study protocol for the Bio-HEAT study. Wellcome Open Research 2025;10:121. https://pmc.ncbi.nlm.nih.gov/articles/PMC12209768/
+3. Vehtari A and colleagues. Rank-normalization, folding, and localization: an improved R-hat for assessing convergence of MCMC. Bayesian Analysis 2021;16:667–718. https://doi.org/10.1214/20-BA1221
+4. Bind MA and colleagues. Causal mediation analysis for longitudinal data with exogenous exposure. Biostatistics 2016;17:122–134. https://doi.org/10.1093/biostatistics/kxv029
+'''
+for key,value in {'DESIGN_TABLE':design_table,'EFFECT_TABLE':effect_table,'GENOTYPE_TABLE':genotype_table,'ROBUSTNESS_TABLE':robust_table,'DIAGNOSTIC_TABLE':diag_table,'TRAJECTORY_FIGURE':fig('05_joint_trajectories.png','Figure 1 Synthetic heat exposure and repeated outcome trajectories'),'EFFECT_FIGURE':fig('06_joint_effects.png','Figure 2 Direct indirect and total effects under the synthetic mechanism'),'SENSITIVITY_FIGURE':fig('07_mediation_sensitivity.png','Figure 3 Indirect effects conditional on assumed residual confounding'),'TRACE_FIGURE':fig('08_traceplots.png','Figure 4 Selected four chain post warmup sampling traces'),'PREDICTIVE_FIGURE':fig('09_predictive_checks.png','Figure 5 Posterior predictive summaries and observed synthetic values')}.items():body=body.replace(key,value)
+title='Heat exposure and maternal and mental health';subtitle='A Bayesian longitudinal mediation simulation'
+navigation='[Word manuscript](output/docx/heat_pregnancy_simulation_report.docx) · [PDF manuscript](output/pdf/heat_pregnancy_simulation_report.pdf) · [Quarto source](report/Heat_Pregnancy_Manuscript.qmd) · [Numerical results](results/extended)'
+repro=r'''
+## Reproducibility and result provenance
+
+The joint model is implemented in Python. Quarto renders the manuscript; mathematical expressions become editable Word equations. This is a documentation revision of the saved 600-participant analysis, rather than a new posterior run. All 55 original result files are checked against provenance/original_results_sha256.json.
+
+To rebuild the manuscript from the saved results, use Python 3.12, the pinned scientific dependencies, the report dependencies and Quarto:
+
+```bash
+python -m venv .venv
+# Activate .venv using the command for your operating system.
+python -m pip install -r requirements.txt -r requirements-report.txt
+python validate_manuscript.py
+python build_report.py
+```
+
+Use `python build_report.py --pdf` to export the new Word manuscript to PDF on Windows with Microsoft Word or on systems with LibreOffice. The Quarto executable may be supplied with `--quarto /path/to/quarto`. PDF and Word snapshots are already included in the repository. These build commands do not resample the Bayesian model or alter its numerical results.
+
+For full scientific regeneration, preserve the saved release first, then run the original analysis sequence:
+
+```bash
+python simulate.py
+python validate.py
+python extend_simulation.py
+python extended_sensitivity.py
+python validate_extended.py
+python build_report.py --pdf
+```
+
+The extension requires the original synthetic daily weather output. Full regeneration may produce platform-dependent numerical differences. Result-preservation checks are intentionally tied to the current saved release and must be versioned before adopting new results. The old ReportLab generator remains in build_extended_report.py for historical audit; build_report.py now produces the consolidated manuscript.
+
+| Resource | Contents |
+| --- | --- |
+| results/extended/synthetic_longitudinal.csv | 2,400 visits; outcome day is seven days after module sampling; visit 4 is postpartum |
+| results/extended/synthetic_clinical.csv | 600 synthetic complications and generator-only vascular intercept truth |
+| results/extended/analysis_inputs.npz | Model matrices, measured module, repeated outcomes and complication |
+| results/extended/generating_truth.json | Full generating coefficients, scales, seed and assumptions |
+| results/extended/joint_causal_effects.csv | Posterior contrasts, intervals, generating values and explicit effect scales |
+| results/extended/joint_diagnostics.csv | Diagnostics for every population parameter and participant effect |
+| results/extended/transcriptomic_scan.csv | Exploratory feature estimates, injected effects and BH adjustment |
+| results/extended/*_population_draws.npz | Population posterior arrays for base, wider-prior and noisy-module fits |
+| results/extended/*_participant_draws.npz | Participant effects stored as float32; inference uses float64 |
+| provenance/original_results_sha256.json | Preservation manifest for the unchanged original result files |
+
+The earlier experiment directly under results used 1,500 recruits, 1,341 retained participants, 152 preterm events and a 300-participant molecular substudy. Its 24 scenarios with 300 repetitions each concern different logistic models. Those sample sizes and operating characteristics are not combined with the Bayesian cohort or presented as its power results.
+'''
+(ROOT/'README.md').write_text(f'# {title}\n\n**{subtitle}**\n\n**Vusumuzi Mabasa · 26 November 2026**\n\n**All participants weather genetic measurements and health outcomes are simulated.**\n\n'+navigation+'\n\n'+body.replace('ASSETS/','results/extended/')+repro,encoding='utf-8')
+source=f'''---
+title: "{title}"
+subtitle: "{subtitle}"
+author: "Vusumuzi Mabasa"
+date: "2026-11-26"
+date-format: "D MMMM YYYY"
+format:
+  docx:
+    toc: false
+fontsize: 11pt
+---
+
+**Simulation study with entirely synthetic participants weather and measurements**
+
+'''+body.replace('ASSETS/','../results/extended/')
+report=ROOT/'report';report.mkdir(exist_ok=True);(report/'Heat_Pregnancy_Manuscript.qmd').write_text(source,encoding='utf-8')
+print('Saved manuscript-style README and Quarto source from unchanged results')

@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "source_files_preserved": 55,
+  "native_word_tables": 8,
+  "word_figures": 9,
+  "native_equations": 29,
+  "README_figures": 9,
+  "visual_quality_assurance": "See epidemiology_quality_assurance.json after render review"
+}

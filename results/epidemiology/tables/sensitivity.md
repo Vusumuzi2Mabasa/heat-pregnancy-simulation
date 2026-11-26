@@ -1,0 +1,5 @@
+| Analysis | Mean difference (95% CI) | P |
+| --- | --- | --- |
+| Visit adjusted only | 0.42 (0.37, 0.47) | <0.001 |
+| Fully adjusted | 0.44 (0.32, 0.56) | <0.001 |
+| Antenatal visits only | 0.46 (0.32, 0.60) | <0.001 |

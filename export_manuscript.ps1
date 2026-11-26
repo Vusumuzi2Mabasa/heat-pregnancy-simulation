@@ -1,5 +1,7 @@
 param([Parameter(Mandatory=$true)][string]$DocumentPath,[Parameter(Mandatory=$true)][string]$PdfPath)
 $ErrorActionPreference='Stop'
+$DocumentPath=[IO.Path]::GetFullPath($DocumentPath).Replace('/','\')
+$PdfPath=[IO.Path]::GetFullPath($PdfPath).Replace('/','\')
 $wordApp=New-Object -ComObject Word.Application
 $wordApp.Visible=$false
 $wordApp.DisplayAlerts=0

@@ -1,0 +1,1 @@
+Original scientific results remain unchanged at the repository root results directory. This archive preserves the previous manuscript, reports and analysis code from commit 6bd0dd1. Run legacy code from the repository root only when deliberately recreating the old analysis.

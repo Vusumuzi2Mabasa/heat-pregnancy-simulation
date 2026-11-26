@@ -6,3 +6,4 @@ launch-*.png
 _working/
 report/*.docx
 report/*.pdf
+!report/epidemiology_reference.docx

@@ -1,0 +1,55 @@
+R version 4.5.1 (2025-06-13 ucrt)
+Platform: x86_64-w64-mingw32/x64
+Running under: Windows 11 x64 (build 26300)
+
+Matrix products: default
+  LAPACK version 3.12.1
+
+locale:
+[1] LC_COLLATE=C                        LC_CTYPE=English_United States.utf8
+[3] LC_MONETARY=C                       LC_NUMERIC=C                       
+[5] LC_TIME=C                          
+
+time zone: Africa/Johannesburg
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] flextable_0.9.10 gtsummary_2.4.0  ggplot2_4.0.0    lmerTest_3.1-3  
+[5] lme4_1.1-37      Matrix_1.7-4    
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.1        dplyr_1.1.4             farver_2.1.2           
+ [4] S7_0.2.0                fastmap_1.2.0           TH.data_1.1-4          
+ [7] fontquiver_0.2.1        broom.helpers_1.22.0    labelled_2.15.0        
+[10] digest_0.6.37           estimability_1.5.1      lifecycle_1.0.5        
+[13] survival_3.8-3          magrittr_2.0.4          compiler_4.5.1         
+[16] rlang_1.1.6             tools_4.5.1             gt_1.1.0               
+[19] data.table_1.17.8       knitr_1.51              labeling_0.4.3         
+[22] askpass_1.2.1           xml2_1.4.0              RColorBrewer_1.1-3     
+[25] multcomp_1.4-28         abind_1.4-8             withr_3.0.2            
+[28] purrr_1.1.0             numDeriv_2016.8-1.1     grid_4.5.1             
+[31] gdtools_0.4.4           xtable_1.8-4            future_1.67.0          
+[34] globals_0.18.0          emmeans_1.11.2-8        scales_1.4.0           
+[37] MASS_7.3-65             dichromat_2.0-0.1       cli_3.6.5              
+[40] mvtnorm_1.3-3           rmarkdown_2.30          ragg_1.5.0             
+[43] reformulas_0.4.4        generics_0.1.4          otel_0.2.0             
+[46] minqa_1.2.8             stringr_1.5.2           splines_4.5.1          
+[49] parallel_4.5.1          vctrs_0.6.5             boot_1.3-32            
+[52] sandwich_3.1-1          jsonlite_2.0.0          fontBitstreamVera_0.1.1
+[55] carData_3.0-5           car_3.1-3               hms_1.1.4              
+[58] Formula_1.2-5           listenv_0.9.1           systemfonts_1.3.1      
+[61] tidyr_1.3.1             glue_1.8.0              parallelly_1.45.1      
+[64] nloptr_2.2.1            codetools_0.2-20        stringi_1.8.7          
+[67] gtable_0.3.6            broom.mixed_0.2.9.6     tibble_3.3.0           
+[70] pillar_1.11.1           furrr_0.3.1             htmltools_0.5.8.1      
+[73] openssl_2.3.4           R6_2.6.1                textshaping_1.0.4      
+[76] Rdpack_2.6.4            lpSolve_5.6.23          evaluate_1.0.5         
+[79] lattice_0.22-7          haven_2.5.5             cards_0.7.0            
+[82] rbibutils_2.3           backports_1.5.0         broom_1.0.10           
+[85] fontLiberation_0.1.0    Rcpp_1.1.0              zip_2.3.3              
+[88] uuid_1.2-1              coda_0.19-4.1           nlme_3.1-168           
+[91] officer_0.7.0           xfun_0.52               fs_1.6.6               
+[94] zoo_1.8-14              forcats_1.0.1           pkgconfig_2.0.3        

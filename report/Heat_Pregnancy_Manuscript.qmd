@@ -1,264 +1,308 @@
 ---
-title: "Heat exposure and maternal and mental health"
-subtitle: "A Bayesian longitudinal mediation simulation"
+title: "Heat exposure and maternal health surrogates in a simulated longitudinal cohort"
 author: "Vusumuzi Mabasa"
-date: "2026-11-26"
-date-format: "D MMMM YYYY"
+date: "26 November 2026"
+subtitle: "Entirely simulated data and applied epidemiology in R"
 format:
   docx:
+    reference-doc: epidemiology_reference.docx
     toc: false
-fontsize: 11pt
+execute:
+  echo: false
+  warning: false
+  message: false
 ---
 
-**Simulation study with entirely synthetic participants weather and measurements**
+```{r}
+library(flextable)
+```
 
 ## Abstract
 
-**Background.** A proposed connection between environmental heat, maternal physical health, mental-health trajectories and molecular response requires models that distinguish repeated associations, genetic modification and mediation. This study evaluated a custom Bayesian joint model under a known synthetic mechanism.
+**Background.** Repeated measurements can distinguish associations with continuous maternal health traits from associations with a pregnancy complication. An epidemiological analysis also needs explicit exposure timing and an appropriate account of measurements from the same woman.
 
-**Methods.** A cohort of 600 synthetic women contributed 2,400 visits, with an expression-module surrogate followed seven days later by vascular, depression and anxiety traits. A binary complication endpoint used antenatal exposure and mediator histories. Correlated participant intercepts linked the repeated traits, and a shared vascular intercept connected the complication likelihood. Four-chain Gibbs sampling was evaluated with rank-normalised diagnostics and predictive checks. Sensitivity analyses examined fixed residual confounding, wider regression priors and expression measurement error.
+**Objective.** To investigate associations between heat exposure and repeated depression, vascular and anxiety surrogates, and a separately generated pregnancy complication, in an entirely synthetic cohort.
 
-**Results.** Population-average indirect effects per one-standard-deviation heat shift were 0.123 (95% credible interval 0.096–0.151) for vascular traits, 0.177 (0.141–0.217) for depression and 0.142 (0.111–0.176) for anxiety. The complication total-effect estimate was 3.52 percentage points (−5.36 to 15.05), while its indirect-effect estimate was 3.64 points (0.83–7.09). All three fits met the recorded sampling thresholds. Measurement error attenuated indirect-effect estimates, and residual-confounding sensitivity changed their interpretation. An exploratory scan selected 22 of 25 injected expression features and one null feature.
+**Methods.** The original 600-woman cohort was retained with 2,400 complete visits. Exposure was the mean daily maximum temperature over seven completed days before each sample. Continuous outcomes were assessed seven days after sampling. The primary outcome was the continuous depression surrogate. Participant random intercept models estimated adjusted mean differences per 5 degrees C, with visit, fictional site, baseline covariates, genotype and season adjustment. Logistic regression examined the complication using antenatal exposure windows only. R produced the analysis, ggplot figures, gtsummary tables and native Word flextables. Secondary analyses examined within-person heat, genetic modification and an exploratory expression pathway decomposition.
 
-**Conclusions.** The workflow recovered aspects of an assumed mechanism and quantified dependence on modelling and measurement assumptions. These are single-cohort simulation results, not clinical or biological discoveries, repeated-simulation power estimates or evidence of a joint-model efficiency advantage.
+**Results.** Higher heat was associated with a depression mean difference of 0.44 (95% CI 0.32 to 0.56) per 5 degrees C. Vascular and anxiety differences were 0.31 (95% CI 0.22 to 0.41) and 0.36 (95% CI 0.24 to 0.47). The complication odds ratio was 1.33 (95% CI 0.38 to 4.63). There were 86 complications among 600 women (14.3%).
+
+**Conclusion.** Higher heat exposure was associated with higher continuous health surrogates in this generated cohort. The complication association remained uncertain. These findings describe synthetic data and provide no evidence about clinical risks in actual pregnant women.
 
 ## Introduction
 
-Heat exposure is relevant to pregnancy research. A systematic review found associations between higher temperatures and adverse pregnancy outcomes, including preterm birth [1]. Prospective work such as Bio-HEAT motivates investigation of possible biological pathways [2]. These sources provide context; their participant data and published effects were not used to calibrate the present generator.
+Maternal heat exposure is an important environmental health question. Published pregnancy research has associated higher temperatures with several adverse birth outcomes [1], but that literature does not establish effects on the fictional outcomes studied here. A useful analysis must define the population, the timing of exposure, the outcome scale and the role of repeated observations before interpreting coefficients.
 
-Physical and mental-health measurements often vary within individuals over time. A joint framework can represent that dependence while allowing a later endpoint to share information with the longitudinal process. Molecular mediation and genetic modification raise distinct questions: an expression response may be placed on an assumed exposure–outcome pathway, whereas genotype precedes exposure and may modify its association. Neither a temporal sequence nor a fitted model alone establishes a causal pathway in patient data.
+This study considers a longitudinal cohort with environmental, molecular and health measurements. The data are entirely simulated, including the weather. A continuous depression score surrogate is different from a clinical diagnosis; an expression module is different from an identified biological mediator; and a generated complication is different from a documented obstetric diagnosis. Those distinctions determine what the analysis can answer.
 
-This study evaluated whether a transparent computational model could recover specified direct, expression-mediated and genotype-dependent effects while accounting for correlated repeated outcomes. The objectives were to implement the joint likelihood, assess posterior sampling and predictive behaviour, and examine sensitivity to residual confounding, regression priors and assay quality. The work is an independent methodological simulation. No funded cohort, institutional collaboration, patient-level discovery or geographical risk estimate is claimed.
+### Aim and objectives
+
+The aim was to estimate the adjusted association between heat exposure and the repeated continuous depression surrogate. Secondary objectives were to describe vascular and anxiety associations, assess the separate pregnancy complication association, investigate genetic and postpartum modification, and explore an expression pathway while assessing its assumptions. The emphasis is the analysis of one fixed cohort, rather than comparing algorithms or estimating simulation power.
 
 ## Methods
 
-### Design and synthetic population
+### Design and population
 
-All participants, weather, genotypes, molecular measurements and health outcomes were generated. The principal analysis used 600 women balanced across three fictional sites, with four complete observations per woman. Conception dates were sampled within 2027–2028 as synthetic calendar indices; these dates are not forecasts. A separate earlier logistic and molecular design experiment is retained under the top-level results directory and is distinguished from the joint-model cohort analysed here.
+The existing synthetic cohort comprised 600 women at three fictional sites, with 200 women per site. Each woman had samples at gestational weeks 14, 20 and 26, and six weeks after a fixed week-40 delivery. Outcomes followed each sample by seven days, corresponding to weeks 15, 21 and 27 and seven weeks postpartum. One postpartum measurement does not describe an entire postpartum trajectory.
 
-| Component | Specification |
-| --- | --- |
-| Population | 600 synthetic women; four complete visits each |
-| Sampling times | Weeks 14, 20 and 26; six weeks postpartum |
-| Repeated traits | Gaussian vascular, depression and anxiety surrogates |
-| Mediator | Prespecified expression module sampled before each outcome |
-| Genetics | One fictional diploid variant with exposure interactions |
-| Complication | 86 events among 600 participants; probit endpoint at fixed delivery |
-| Molecular scan | 500 separate synthetic features; 25 injected heat effects |
-| Posterior sampling | Four chains; 1,500 warmup and 2,000 retained draws per chain |
+The analysis reuses the original saved cohort. No participant, outcome, seed or effect parameter was changed to obtain a preferred result. The primary outcome and adjustment structure were defined for this epidemiological refocus; this was not a preregistered or blinded analysis. The original Bayesian results, posterior draws and feature screen remain unchanged, with their prior manuscript and code preserved under `archive/bayesian-study-v2`.
 
-Maternal age, deprivation, an ancestry proxy and baseline distress were generated before follow-up. Allele dosage $G_i$ followed a binomial distribution with two trials and allele frequency
+### Data preparation and measurement audit
 
-$$
-\operatorname{logit}(p_i)=\operatorname{logit}(0.30)+0.20A_i,\qquad g_i=G_i-0.6.
-$$
+R verified participant keys, four visits per woman, visit ordering, within-woman invariance of baseline covariates, binary complication coding and the mapping of raw fictional dosage to the original centred genotype. All 2,400 visits were complete for the analysis variables; there were no duplicated woman-visit keys, exclusions or newly imputed values. An independent calculation reconstructed 80 distributed exposure windows from the saved daily weather panel and agreed within numerical tolerance. The machine-readable audit and analysis datasets are retained in `results/epidemiology`.
 
-Here $A_i$ is the synthetic ancestry proxy. The single variant has no real locus identifier. The design is not a GWAS, a polygenic analysis or evidence for any specific susceptibility allele.
+Age, deprivation, ancestry and baseline distress are continuous synthetic surrogates. Actual age in years is unavailable, and deprivation is not binary. Their coefficients therefore refer to one stored surrogate unit. The outcome names contain `_z`, but results are reported in stored surrogate units; they are not necessarily one empirical standard deviation of this cohort. The generic complication is coded 0 for absence and 1 for presence. The original generator-only vascular random intercept was excluded from every analysis dataset and model.
 
-### Exposure and temporal ordering
+### Heat exposure and temporal ordering
 
-The synthetic daily weather series spanned 2010–2030, with three site baselines of 24, 27 and 29°C. It imposed a 5°C annual seasonal amplitude, a 0.04°C annual trend, a shared autoregressive component with coefficient 0.65 and innovation standard deviation 1.7°C, and site-specific daily noise with standard deviation 0.7°C. Six neighbourhood labels within each site received fixed offsets $(k-2.5)\times0.35$°C, for $k=0,\ldots,5$.
-
-These labels are categorical exposure strata. They have no latitude, longitude, distance or specified adjacency structure. No maps, spatial-autocorrelation tests or geographical hot-spot claims were added because the present data-generating mechanism does not support them. Shared weather noise describes temporal dependence and does not supply a spatial model.
-
-For each woman, module samples occurred at gestational days 98, 140 and 182 and at day 322, corresponding to six weeks postpartum under fixed day-280 delivery. Heat was the mean daily maximum temperature over the seven completed days before the module sample. Continuous outcomes were generated seven days after each sample. Across the cohort visits, exposure had mean 27.64°C and standard deviation 4.36°C; standardised heat was $H_{it}=(T_{it}-\bar T)/s_T$.
-
-The complication endpoint was ascertained at fixed delivery and used averages over the first three antenatal exposure and module measurements. Postpartum measurements entered only the postpartum repeated outcomes. All women were assumed to remain pregnant through the antenatal measurements. Early delivery, fetal loss, variable delivery timing, dropout and missing assays were not simulated. Temporal ordering is therefore internally consistent under a restrictive design rather than a demonstrated model of actual pregnancy follow-up.
-
-### Joint likelihood and generating mechanism
-
-Let $M_{it}$ denote the observed continuous expression-module surrogate and $Y_{kit}$ the repeated trait for domain $k$, corresponding to vascular, depression or anxiety measurements. The fitted structure was
+For sample day $s_{iv}$ of woman $i$ at visit $v$, daily maximum temperature $T$ defined exposure
 
 $$
-M_{it}=X_{it}^{\mathsf T}a+\epsilon_{Mit},\qquad
-Y_{kit}=X_{it}^{\mathsf T}B_k+\beta_{Mk}M_{it}+u_{ki}+\epsilon_{Ykit}.
+H_{iv}=\frac{1}{7}\sum_{j=1}^{7}T_{iv}(s_{iv}-j),\qquad X_{iv}=H_{iv}/5.
 $$
 
-$$
-u_i\sim N_3(0,D),\quad \epsilon_{Mit}\sim N(0,\sigma_M^2),\quad
-\epsilon_{Ykit}\sim N(0,\sigma_k^2).
-$$
+The sample day was excluded. Because the health outcome occurred on $s_{iv}+7$, the temperature window covered days 14 through 8 before that outcome. It was not the seven days immediately before the outcome. The exposure contrast was 5 degrees C. Weather, sites, neighbourhood labels and calendar dates were synthetic; the study used neither real ERA5 observations nor actual recruitment sites. Neighbourhood labels have no geographical coordinates or adjacency, so spatial models and maps were not justified.
 
-The design vector $X_{it}$ contained an intercept, heat, centred genotype, heat-by-genotype interaction, age, deprivation, ancestry proxy, baseline distress, site indicators, seasonal sine and cosine terms and visit indicators. Module errors were independent of participant effects and outcome errors in the base generator. Repeated outcome errors were conditionally independent given covariates and the correlated participant intercepts. The module had no additional random intercept.
+### Continuous outcome association models
 
-The complication component used probit augmentation,
+The primary model was
 
 $$
-C_i=\mathbb{1}(Z_i^*>0),\qquad
-Z_i^*=Z_i^{\mathsf T}c+\lambda u_{vi}+\epsilon_{Ci},\quad \epsilon_{Ci}\sim N(0,1).
+Y_{iv}=\alpha+\beta_H X_{iv}+\boldsymbol\eta^{\mathsf T}V_v+
+\boldsymbol\gamma^{\mathsf T}C_i+\boldsymbol\delta^{\mathsf T}S_i+
+\theta_1\sin(2\pi s_{iv}/365.25)+\theta_2\cos(2\pi s_{iv}/365.25)+u_i+\epsilon_{iv},
 $$
 
-Here $u_{vi}$ is the participant vascular intercept. $Z_i$ contained antenatal-average predictors and module, with averaged visit indicators omitted because they were redundant. The complication observation updated $u_{vi}$ in the sampler, making the endpoint and longitudinal traits part of a shared likelihood. The correlated matrix $D$ connected the repeated outcome domains. This construction does not assert that depression or anxiety causes the complication.
+where $Y_{iv}$ was the depression surrogate, $V_v$ categorical visit, $C_i$ age, deprivation, ancestry, baseline distress and centred genotype, and $S_i$ two fixed site indicators. The participant intercept followed $u_i\sim N(0,\tau^2)$ and conditional residuals followed $\epsilon_{iv}\sim N(0,\sigma^2)$. The model assumes an adequate conditional mean, independent participants and conditional within-participant residual independence. Fixed site indicators adjusted mean site differences; three sites were not treated as a sufficient basis for site-clustered robust standard errors.
 
-The module heat coefficient was 0.40, its heat-by-genotype coefficient 0.12 and its residual standard deviation 0.70. The vascular, depression and anxiety direct heat coefficients were 0.18, 0.15 and 0.12; module coefficients were 0.30, 0.40 and 0.35; and direct heat-by-genotype coefficients were 0.08, 0.06 and 0.05. Outcome residual standard deviations were 0.65, 0.80 and 0.75. Participant variation followed
+Models were fitted by restricted maximum likelihood using lmerTest and lme4 [2,3]. Confidence intervals and two-sided tests used Satterthwaite degrees of freedom. The coefficient $\beta_H$ represents an adjusted mean difference per 5 degrees C. The expression module was omitted from these primary models to avoid conditioning on the proposed pathway. Accordingly, these are total adjusted associations, not automatically causal total effects. Identical models addressed vascular and anxiety surrogates, with Holm correction across those two secondary heat tests. The depression heat test was the designated primary test.
 
-$$
-D=\begin{pmatrix}0.49&0.21&0.14\\0.21&0.64&0.32\\0.14&0.32&0.49\end{pmatrix}.
-$$
+A visit-adjusted-only model assessed the contribution of the full adjustment set. Antenatal-only analysis excluded the postpartum visit. A within-between sensitivity model replaced $X_{iv}$ by the participant mean $\bar X_i$ and deviation $X_{iv}-\bar X_i$. Its within-person coefficient asks whether a woman had a higher outcome when her heat exposure was higher relative to her own average, conditional on visit and seasonal terms. This does not eliminate time-varying confounding.
 
-The complication generator had intercept −1.35, heat coefficient 0.20, module coefficient 0.35, heat-by-genotype coefficient 0.10 and shared vascular loading 0.65. Additional covariate and visit coefficients, complete matrices and seed 2026102302 are recorded in results/extended/generating_truth.json. All coefficients are illustrative assumptions on the simulated scales, not estimates derived from an empirical cohort.
+### Pregnancy complication model
 
-### Priors and posterior computation
+The complication was recorded once per woman at fixed day 280 after conception. There were no onset dates, and all deliveries were fixed at week 40 in the generator. The outcome therefore supports neither a survival analysis nor a preterm-birth analysis. Antenatal exposure was the arithmetic mean of the three antenatal seven-day windows, not a whole-pregnancy average. Postpartum measurements were excluded.
 
-Repeated-outcome and probit regression slopes had independent $N(0,1)$ priors, with $N(0,4)$ intercept priors. Continuous outcome variances had inverse-gamma priors with shape 3 and scale 2. The participant covariance had an inverse-Wishart prior with 5 degrees of freedom and scale $0.5I_3$. For the module model,
+With $D_i$ denoting complication status and $\bar X_{i,A}$ the antenatal exposure, the model was
 
 $$
-\sigma_M^2\sim\operatorname{IG}(3,2),\qquad a\mid\sigma_M^2\sim N(0,\sigma_M^2I).
+\log\left\{\frac{\Pr(D_i=1)}{1-\Pr(D_i=1)}\right\}
+=a+b_H\bar X_{i,A}+\boldsymbol c^{\mathsf T}Z_i.
 $$
 
-These are regularising assumptions, not clinically elicited priors. Blocked Gibbs sampling used exact Gaussian, inverse-gamma and inverse-Wishart conditionals and truncated-normal augmentation for the probit endpoint. Four dispersed chains contributed 1,500 warmup iterations and 2,000 retained draws each. The complete implementation is in extend_simulation.py. No HMC or NUTS algorithm was used.
+The adjustment vector contained age, deprivation, ancestry, baseline distress, site indicators and mean antenatal seasonal sine and cosine. Nine slope parameters were retained for 86 events; no stepwise selection was used. Odds ratios were $\exp(b)$ with HC3 sandwich Wald 95% confidence intervals, not risk ratios or posterior odds. The expression module was excluded from this association model.
 
-Rank-normalised folded split $\widehat R$, bulk effective sample size, tail effective sample size and Monte Carlo standard error were evaluated for every population parameter and all 1,800 participant effects, giving 1,887 scalar targets per fit. Recorded targets were $\widehat R<1.01$ and bulk and tail ESS greater than 400 [3]. Trace plots complemented numerical diagnostics. HMC divergences, treedepth and BFMI are not applicable to this sampler. These checks assess sampling, not clinical validity or model-selection performance.
+### Secondary modification and expression pathway analyses
 
-### Direct and mediated contrasts
+Two separate depression models added heat by centred genotype or heat by postpartum phase. Formal interaction tests compared maximum likelihood fits; their two p values received Holm correction. The genotype was a fictional dosage with no real gene or variant interpretation. Genotype-specific heat slopes were derived from one interaction model, rather than inferred by comparing significance in separate groups.
 
-The exposure contrast was a one-standard-deviation increase in heat. For centred dosage $g$, the conditional module response and continuous-outcome effects were
+An exploratory expression analysis fitted
 
 $$
-a_H(g)=a_H+a_{HG}g,\qquad
-\operatorname{NIE}_k(g)=a_H(g)\beta_{Mk},
+M_{iv}=a_0+a_HX_{iv}+a_GG_i^c+a_{HG}X_{iv}G_i^c+\boldsymbol a_C^{\mathsf T}W_{iv}+e_{M,iv},
 $$
 
 $$
-\operatorname{NDE}_k(g)=B_{Hk}+B_{HGk}g,\qquad
-\operatorname{TE}_k(g)=\operatorname{NDE}_k(g)+\operatorname{NIE}_k(g).
+Y_{iv}=c_0+c_HX_{iv}+c_GG_i^c+c_{HG}X_{iv}G_i^c+b_MM_{iv}+\boldsymbol c_C^{\mathsf T}W_{iv}+u_i+e_{Y,iv}.
 $$
 
-Effects were reported for each fictional dosage and averaged over the observed dosage frequencies. There was no exposure-by-module interaction in the outcome equations. The approach specifies a particular form of moderated mediation; it does not evaluate every possible genetic pathway.
+Both equations used the same baseline, visit, site and seasonal covariates. The mediator equation was ordinary linear regression and the outcome equation included a participant random intercept. Inference resampled whole women, retaining all four visits; repeated draws received distinct bootstrap identifiers. The average product pathway was $(a_H+a_{HG}\overline{G^c})b_M$, the remaining direct association was $c_H+c_{HG}\overline{G^c}$, and their algebraic sum was the decomposed total. It need not equal the coefficient from the primary model, which omits genotype interaction.
 
-For the complication, effects were calculated on the probability scale by integrating new-participant vascular effects and averaged antenatal module residuals. The marginal probability denominator was
+Three hundred participant bootstrap resamples produced percentile confidence intervals. These quantify uncertainty conditional on the fitted path models; they are not repeated new cohorts or an assessment of power. The decomposition requires correct temporal and model specification for a causal interpretation, together with consistency, adequate exposure support and no unmeasured exposure-outcome, exposure-mediator or mediator-outcome confounding. It does not implement a longitudinal causal g-formula for exposure-induced time-varying confounding [4]. No mediated proportion was emphasised.
 
-$$
-\sqrt{1+\lambda^2D_{vv}+c_M^2\sigma_M^2/3}.
-$$
-
-For each posterior draw, $R_{00}$ represented baseline heat and its corresponding module, $R_{10}$ shifted heat while holding the baseline module, and $R_{11}$ shifted both heat and the module response. Direct, indirect and total contrasts were $R_{10}-R_{00}$, $R_{11}-R_{10}$ and $R_{11}-R_{00}$. The module residual contribution was divided by three because the endpoint used three independent antenatal module errors. Population risks averaged the empirical covariate distribution while integrating participant effects at their unconditional distribution, justified by their independence from covariates and module errors in the generator.
-
-Natural-effect interpretation requires the specified structural model, consistency, adequate exposure support and exchangeability assumptions, including no unmeasured exposure–outcome or module–outcome confounding conditional on the model. No exposure-induced module–outcome confounders or treatment feedback were simulated. These assumptions are known features of the generator; they would require substantive justification in observational research [4].
-
-### Sensitivity and exploratory expression analyses
-
-Residual-confounding sensitivity fixed an assumed correlation $\rho$ between module and outcome errors from −0.6 to 0.6. For each continuous domain, the module coefficient was reparameterised as
+A working residual-correlation sensitivity varied $\rho$ from -0.6 to 0.6. It replaced $b_M$ by $b_M-\kappa(\rho)$, where
 
 $$
-\beta_{Mk}(\rho)=\beta_{Mk}-\frac{\rho\sigma_k}{\sigma_M\sqrt{1-\rho^2}}.
+\kappa(\rho)=\frac{\rho\sigma_Y}{\sigma_M\sqrt{1-\rho^2}}.
 $$
 
-The direct coefficient changed correspondingly to preserve the observed-model representation. The probit calculation used averaged module residual standard deviation $\sigma_M/\sqrt3$, conditional probit residual standard deviation 1 and the implied covariance terms. The total-variance identity was independently checked. Each outcome was examined separately; the analysis neither estimated $\rho$ nor fitted a simultaneous unrestricted residual correlation matrix.
+This is a linear sensitivity device, not an identified correction or proof of a natural indirect effect. It shows how dependence between otherwise unmeasured mediator and outcome disturbances can change the pathway interpretation.
 
-Two refits used unchanged underlying participants and outcomes. A wider-prior fit doubled regression prior standard deviations while retaining the variance and covariance priors. A measurement-error fit added independent $N(0,0.5^2)$ noise to the observed module and refitted the original model without error correction. Its conditional reliability was $0.49/(0.49+0.25)=0.662$. This was an assay-quality stress test, not a latent measurement-error model.
+### Diagnostics and reporting
 
-A separate exploratory matrix contained 500 continuous normalised-expression surrogates, of which 25 had injected heat effects. Feature testing used participant demeaning, covariate adjustment, participant-clustered inference and Benjamini–Hochberg adjustment over 500 tests. The prespecified module was generated independently of this scan, so selected features were not fed back into mediation. These are continuous synthetic features, not RNA-seq counts or real gene identifiers.
+Checks covered convergence, singular random effects, residual-versus-fitted patterns, residual and random-intercept quantiles, and generalised variance inflation. Heat and age functional forms were assessed by comparing linear terms with three-degree-of-freedom natural splines using maximum likelihood, not comparisons of restricted likelihoods with different fixed effects. A nonsignificant diagnostic does not prove an assumption.
 
-### Predictive and numerical checks
-
-Four hundred prior and 400 posterior predictive replications were used. Posterior replications generated new participant effects, modules, repeated traits and complications at the observed covariates. Fifteen prespecified summary statistics were compared with central predictive intervals. Predictive tail proportions are descriptive Bayesian checks, not classical p values or estimates of external diagnostic performance.
-
-Independent numerical checks covered conjugate module posterior moments, Gaussian precision sampling, marginal probit integration, direct-plus-indirect decomposition, the $\rho=0$ identity, causal timing and full diagnostic coverage. This manuscript revision used saved numerical results and did not resample the posterior or generate a spatial extension. Checksums preserve every original scientific result file; the original document remains accessible through the repository history.
+The logistic model was checked for full rank, finite estimates and complete or quasi separation using linear programming. Cook distances described influence. Every eligible woman remained in the main analysis; omitting the five largest values was reported only as a sensitivity. Preprocessing, models, statistical tables, diagnostics and figure generation were performed in R. Native Word tables used gtsummary and flextable, figures used ggplot2, and Quarto generated the manuscript. The prior Python Bayesian analysis was preserved rather than relabelled as this R analysis.
 
 ## Results
 
-### Exposure and repeated outcome trajectories
+### Cohort and exposure distribution
 
-The cohort contained 86 simulated complications among 600 women (14.3%) and 2,400 complete module–outcome pairs. Heat exposure differed between fictional sites and across visits under the imposed seasonal field. The outcome trajectories combine generated visit effects, heat, module variation and participant heterogeneity. Visit labels index module collection, with trait measurements one week later. The fourth visit represents postpartum follow-up, not an ongoing pregnancy at week 46.
+There were 600 women, 2,400 visits and 86 complications (14.3%). All three sites contributed 200 women and all four visits contributed 600 outcomes. Baseline summaries below use one record per woman. Differences by eventual complication status are descriptive and were not used to select predictors. Values are mean (SD) or number (percent).
 
-![Figure 1 Synthetic heat exposure and repeated outcome trajectories](../results/extended/05_joint_trajectories.png)
+::: {custom-style="Table Caption"}
+Table 1 Baseline characteristics by subsequent complication status
+:::
 
-### Direct and mediated effects
+```{r}
+#| echo: false
+readRDS("../results/epidemiology/tables/baseline_flextable.rds")
+```
 
-The continuous-outcome indirect-effect intervals were above zero in the base fit. Total-effect estimates were positive for the three continuous traits, whereas the complication total-effect interval included zero. This distinction matters: a positive indirect-effect interval does not establish a precisely estimated positive total complication effect. These are estimates from one generated cohort, not population effect estimates or repeated-simulation coverage results.
+Temperature varied across the three fictional sites and across visits. These variations provide the observed exposure contrasts, but site and seasonal adjustment also reduce the independent heat information available for estimating the complication association.
 
-| Outcome | Direct effect 95% CrI | Indirect effect 95% CrI | Total effect 95% CrI |
-| --- | --- | --- | --- |
-| Vascular | 0.145 (0.062, 0.225) | 0.123 (0.096, 0.151) | 0.268 (0.184, 0.350) |
-| Depression | 0.191 (0.091, 0.290) | 0.177 (0.141, 0.217) | 0.368 (0.266, 0.470) |
-| Anxiety | 0.157 (0.063, 0.250) | 0.142 (0.111, 0.176) | 0.299 (0.205, 0.393) |
-| Complication | -0.124 (-7.830, 10.351) | 3.644 (0.831, 7.091) | 3.520 (-5.355, 15.046) |
+![Figure 1 Heat exposure by visit and fictional site](../figures/epidemiology/01_exposure.png){width=6.3in}
 
-Continuous effects are in standardised outcome units; complication effects in this table are **percentage points**. All intervals are equal-tail 95% posterior credible intervals. The source CSV and the complication panel of the figure use unscaled risk differences. Generating values in the figure support recovery assessment within this specific mechanism; they are not empirical benchmarks.
+The visit table describes the actual stored outcome scales. The postpartum observation is a distinct phase and was not treated as an additional gestational week.
 
-![Figure 2 Direct indirect and total effects under the synthetic mechanism](../results/extended/06_joint_effects.png)
+::: {custom-style="Table Caption"}
+Table 2 Observed visit summaries
+:::
 
-### Genetic modification
+```{r}
+#| echo: false
+readRDS("../results/epidemiology/tables/visits_flextable.rds")
+```
 
-The fitted heat-by-genotype coefficient was 0.128 (95% CrI 0.080–0.175) for vascular traits, 0.033 (−0.026 to 0.092) for depression and 0.066 (0.009–0.122) for anxiety. Their injected coefficients were 0.08, 0.06 and 0.05. The module interaction was 0.136 (0.093–0.178), compared with injected value 0.12. The depression interaction interval included zero and is retained without interpreting it as proof of no modification.
+### Primary depression association
 
-Genotype-dependent depression indirect effects increased with dosage because the generator included a heat-by-genotype term in the module equation. The outcome module coefficient was constant. These findings concern one fictional variant and should not be interpreted as genetic marker discovery.
+Higher heat exposure was associated with a depression mean difference of 0.44 (95% CI 0.32 to 0.56) per 5 degrees C (p <0.001). Secondary vascular and anxiety associations were also positive: 0.31 (95% CI 0.22 to 0.41) and 0.36 (95% CI 0.24 to 0.47). Both remained below 0.05 after Holm correction across the two secondary outcomes. These estimates describe the generated health scales, not clinical diagnoses.
 
-| Fictional allele dosage | Depression indirect effect 95% CrI | Generating value |
-| --- | --- | --- |
-| 0 | 0.141 (0.105, 0.180) | 0.131 |
-| 1 | 0.198 (0.159, 0.239) | 0.179 |
-| 2 | 0.254 (0.205, 0.305) | 0.227 |
+::: {custom-style="Table Caption"}
+Table 3 Adjusted heat associations with continuous outcomes
+:::
 
-### Dependence on confounding and assay assumptions
+```{r}
+#| echo: false
+readRDS("../results/epidemiology/tables/heat_flextable.rds")
+```
 
-Increasing the assumed positive module–outcome residual correlation reduced the inferred indirect effects. Intervals at a fixed $\rho$ are conditional posterior transformations, not estimates of the amount of unmeasured confounding. Their movement demonstrates that the mediation interpretation is sensitive to an assumption which cannot be verified from temporal ordering alone.
+The individual trajectories show substantial participant-to-participant variation. Adjusted means hold the model covariates at their reference grid, including average heat, continuous covariates and equal weighting across sites. They do not show the effect of an intervention or imply that an individual woman's outcome must follow the adjusted line.
 
-![Figure 3 Indirect effects conditional on assumed residual confounding](../results/extended/07_mediation_sensitivity.png)
+![Figure 2 Observed depression trajectories and adjusted visit means](../figures/epidemiology/02_trajectories.png){width=6.3in}
 
-The wider regression priors produced similar continuous indirect effects. Because the residual-variance and covariance priors were unchanged, this supports a limited regression-prior sensitivity statement rather than comprehensive prior robustness. Adding module noise attenuated the continuous indirect estimates in the naive refit, including a change in depression from 0.177 to 0.103. The complication indirect estimate also decreased, with substantial remaining uncertainty.
+The association plot separates the designated primary depression outcome from the secondary vascular and anxiety outcomes. All three outcomes are continuous surrogates, so the estimates are mean differences rather than odds ratios.
 
-| Outcome | Base indirect mean | Wider prior 95% CrI | Noisy module 95% CrI |
-| --- | --- | --- | --- |
-| Vascular | 0.123 | 0.123 (0.096, 0.152) | 0.074 (0.053, 0.097) |
-| Depression | 0.177 | 0.178 (0.142, 0.217) | 0.103 (0.076, 0.134) |
-| Anxiety | 0.142 | 0.142 (0.111, 0.176) | 0.093 (0.068, 0.121) |
-| Complication | 3.644 | 3.516 (0.868, 6.918) | 2.760 (0.598, 5.529) |
+![Figure 3 Adjusted heat associations with continuous outcomes](../figures/epidemiology/03_heat_associations.png){width=6.3in}
 
-The table reports indirect effects; base entries are posterior means and sensitivity entries are means with 95% credible intervals. Complication values are percentage points; other values use standardised trait units. Measurement error changed the observed predictor while retaining the same outcomes. It was not corrected by the refitted model.
+The full primary model table shows the adjustment set and uncertainty in its coefficients. Site 1, the first sample visit and the centred genotype reference are the relevant comparison levels. Baseline covariate coefficients are conditional associations, not independently established causal effects.
 
-### Exploratory feature recovery
+::: {custom-style="Table Caption"}
+Table 4 Full adjusted depression model
+:::
 
-The scan selected 22 of 25 injected features and one of 475 null features at BH $q<0.05$. Realised sensitivity was 88.0% and the false-discovery proportion was $1/23=4.3\%$. The latter is a single-realisation quantity and does not establish repeated-simulation false-discovery-rate control. Features have no biological gene identities, and their recovery does not independently validate the prespecified mediator.
+```{r}
+#| echo: false
+readRDS("../results/epidemiology/tables/primary_flextable.rds")
+```
 
-### Posterior computation
+### Sensitivity and model assumptions
 
-All three recorded fits met the prespecified sampling thresholds across 1,887 scalar targets per fit. The base fit had maximum $\widehat R=1.0065$, minimum bulk ESS 712 and minimum tail ESS 1,182. Selected traces illustrate mixing for population parameters, while the numerical diagnostics additionally cover all participant effects. Convergence is evidence about posterior computation, not evidence that the assumed model is scientifically correct.
+The antenatal-only depression estimate was 0.46 (95% CI 0.32 to 0.60) per 5 degrees C. The within-person estimate was 0.44 (95% CI 0.32 to 0.57), while the between-person estimate was 0.42 (95% CI 0.18 to 0.66). The similar within-person result supports consistency of the association across these working specifications, without proving freedom from time-varying confounding.
 
-| Model | Maximum R hat | Minimum bulk ESS | Minimum tail ESS |
-| --- | --- | --- | --- |
-| Base joint model | 1.0065 | 712.0 | 1182.1 |
-| Wider regression priors | 1.0070 | 640.8 | 1292.5 |
-| Noisy expression module | 1.0062 | 679.6 | 1007.2 |
+::: {custom-style="Table Caption"}
+Table 5 Depression association sensitivity analyses
+:::
 
-![Figure 4 Selected four chain post warmup sampling traces](../results/extended/08_traceplots.png)
+```{r}
+#| echo: false
+readRDS("../results/epidemiology/tables/sensitivity_flextable.rds")
+```
 
-### Predictive checks and validation
+The depression model was nonsingular and converged, with an intraclass correlation of 0.45. The heat spline comparison gave p 0.327 and the age-surrogate comparison p 0.066; neither met the 0.05 threshold. Heat shared substantial information with site and season: its one-degree-of-freedom variance-inflation factor was 6.67. Residual quantiles were approximately linear centrally, with some tail departures. Residuals against fitted values showed no prominent curvature or funnel. These visual findings support the working mean and variance structure but do not verify conditional independence. Residual and random-intercept plots are supplied below.
 
-All 15 observed synthetic summaries fell within their central 95% posterior predictive intervals. The agreement concerns replications under the fitted model at the same covariates and does not represent independent test-set performance. Prior predictive complication rates were broad, with a central interval of approximately 9%–93%, showing that the priors had not been clinically elicited.
+### Pregnancy complication association
 
-![Figure 5 Posterior predictive summaries and observed synthetic values](../results/extended/09_predictive_checks.png)
+The adjusted complication odds ratio per 5 degrees C higher antenatal heat was 1.33 (95% CI 0.38 to 4.63) (p 0.658). The interval includes both appreciably lower and higher odds; the data do not support a precise direction or magnitude. Age-surrogate association was 1.35 (95% CI 1.07 to 1.71) per stored unit, which cannot be translated into years. The model converged without detected separation. Omitting the five largest Cook distances gave a heat OR of 2.23 (95% CI 0.70 to 7.16) among 595 women with 81 events; all 600 women remain in the primary model.
 
-The saved validation passed the analytic, temporal and simulation-algebra checks described in the methods. The original numerical result files were retained unchanged during this manuscript revision. Neither the predictive checks nor the validation establish frequentist coverage, out-of-sample clinical utility or superiority of the joint model over separate outcome models.
+::: {custom-style="Table Caption"}
+Table 6 Adjusted associations with the pregnancy complication
+:::
+
+```{r}
+#| echo: false
+readRDS("../results/epidemiology/tables/clinical_flextable.rds")
+```
+
+The forest plot presents the heat association alongside selected covariate associations. Its wide heat interval should be interpreted as limited precision in this cohort, rather than evidence that the complication has the same relationship with heat as the continuous outcomes.
+
+![Figure 4 Adjusted pregnancy complication associations](../figures/epidemiology/04_clinical_associations.png){width=6.3in}
+
+### Genetic modification and postpartum phase
+
+The heat-by-genotype likelihood-ratio test gave p 0.007 and Holm-adjusted p 0.014. Estimated depression slopes increased across fictional dosage 0, 1 and 2: 0.38, 0.48 and 0.57 per 5 degrees C. This concerns a deliberately synthetic genotype, not a discovered variant. The heat-by-postpartum test gave p 0.574 (Holm p 0.574), providing no clear evidence of a phase difference in this cohort; it does not establish identical antenatal and postpartum effects.
+
+![Figure 5 Heat associations by fictional genotype](../figures/epidemiology/07_genotype_interaction.png){width=6.3in}
+
+### Exploratory expression pathway
+
+The exploratory product pathway through the expression module was 0.20 (95% CI 0.16 to 0.25) depression-surrogate units per 5 degrees C. Its percentile interval used 300 valid participant resamples out of 300 requested; 0 fits failed or did not converge. This is a conditional statistical decomposition, not proof of a biological mechanism. The primary heat association and the pathway estimate answer different questions, and a significant total association is not a prerequisite for estimating the pathway.
+
+::: {custom-style="Table Caption"}
+Table 7 Exploratory expression pathway decomposition
+:::
+
+```{r}
+#| echo: false
+readRDS("../results/epidemiology/tables/mediation_flextable.rds")
+```
 
 ## Discussion
 
-This study provides an executable example of a Bayesian joint framework linking a specified expression response, repeated maternal and mental-health traits and a later complication. Its main methodological value is the explicit separation of direct heat effects, expression-mediated contrasts and genetic modification, together with clear treatment of timing and uncertainty. The shared vascular intercept connects the complication and longitudinal likelihoods, while correlated intercepts represent dependence between repeated outcome domains.
+This analysis found positive adjusted heat associations with continuous depression, vascular and anxiety surrogates in a fixed synthetic cohort. The depression result was similar when limited to antenatal observations and when separating within-person heat from average exposure. The distinct complication model produced a much less precise heat association. The difference between these findings is informative: more repeated continuous information does not create additional independent pregnancy complications.
 
-The continuous indirect effects were recovered as positive under the base generator, but this result was partly built into the experiment through nonzero module and outcome coefficients and independent base-case errors. It is a recovery assessment, not an empirical discovery of a biological pathway. The complication result was less precise, illustrating why a plausible indirect pathway and an imprecise total effect can coexist in a modest cohort with 86 events. The analysis should not be modified merely to make every interval exclude zero.
+The genotype interaction describes modification within a deliberately structured simulation, with no claim about a real molecular marker. The expression pathway is also exploratory. Temporal ordering is present in the saved data, but causal mediation depends on assumptions that ordering alone cannot establish. A positive product pathway does not demonstrate that changing a real expression module would change maternal health.
 
-The sensitivity results place substantive limits on interpretation. Wider regression priors had little influence on several continuous indirect effects, yet assumed residual confounding and module noise altered the mediated estimates. Stable MCMC sampling cannot compensate for an incorrect mediation assumption or an unreliable assay. In a real study, cell composition, treatment, illness severity and social adversity could jointly influence molecular measurements and outcomes; measuring a module before a trait would not remove those threats by itself.
+Important limitations arise from the dataset itself. The data were generated with heat associations and expression pathways, so their presence is not new epidemiological evidence. Participants are fictional, measurement error and dropout are absent, there is no clinical diagnostic validation, and baseline scores do not reproduce a complete confounder set. Seasonal heat and fictional site share information, particularly for the three-window antenatal average. The model assumes independent women conditional on its structure; real studies may need additional environmental, household or healthcare clustering. The residual-correlation analysis is only a working linear sensitivity and does not resolve time-varying confounding. Three hundred bootstrap resamples provide an exploratory interval with finite Monte Carlo precision.
 
-Several design limitations restrict transfer to patients. Follow-up assumes fixed term delivery, complete measurements and no fetal loss, despite the clinical importance of delivery-dependent observation. Physical and mental outcomes are Gaussian standardised surrogates rather than validated diagnoses or symptom instruments. Expression lacks realistic gene correlation, count distributions and biological annotation. Only one fictional genotype was analysed. The mediator was prespecified, so no strategy for discovering and independently validating a molecular module was evaluated. The model is custom and parametric; it is not a reproduction of an established semiparametric method.
-
-The Bayesian results arise from one cohort and a small set of sensitivity refits. There is no repeated Bayesian simulation establishing power or coverage and no comparison demonstrating an efficiency advantage over separate models. The earlier logistic design experiment remains a separate resource and cannot supply those missing properties. Although the weather generator includes categorical site and neighbourhood offsets, no geographic geometry or spatial dependence model was specified. Maps or spatial test statistics would therefore add unsupported geographic meaning to the current study and were deliberately excluded.
-
-An empirical extension would require defined clinical endpoints, validated exposure windows, reliable assays, appropriate follow-up and a prespecified identification strategy. Cohort-specific spatial analysis would additionally require legitimate geographic information and an explicit scientific question, such as exposure misclassification or residual geographic confounding, with appropriate privacy controls. Those requirements concern future study design and have not been satisfied by assigning labels to synthetic neighbourhoods.
+For real data, the same workflow would first require actual age, measured heat linkage, validated trait instruments, complication definitions and onset dates, recruitment dates, missing-data provenance, socioeconomic and obstetric confounders, and measurement quality checks. A documented causal diagram should guide adjustment. Exposure timing and a missing-data plan should be fixed before model fitting. Larger cohorts or more events may improve complication precision, but replacing the endpoint or searching for a significant model would not solve the underlying information limit.
 
 ## Conclusion
 
-The joint Bayesian workflow can represent a known synthetic connection between heat, an expression-module surrogate, repeated maternal and mental-health traits and a later complication. Positive indirect effects in the base fit depend on the generator and its mediation assumptions; sensitivity analyses reveal the importance of confounding and measurement quality. Sampling and predictive checks support implementation in this example, while substantial limitations prevent clinical, biological or geographic claims. The study is a reproducible methodological demonstration requiring further simulation and independent data before scientific generalisation.
+In this entirely synthetic cohort, higher seven-day heat exposure was associated with higher repeated continuous health surrogates. Evidence for a pregnancy complication association was inconclusive. The study demonstrates a complete R association workflow with transparent preprocessing, outcome-appropriate models, diagnostics and cautious pathway interpretation. It provides no estimated clinical risk, validated biomarker or public-health recommendation for actual populations.
 
-## Data and code availability
+## Supplementary diagnostics
 
-All data are synthetic. Original cohort files, parameter draws, effect estimates, diagnostics and predictive checks remain in results/extended; the earlier independent experiment remains directly under results. The source code and manuscript are maintained together. No actual patient records, reanalysis climate observations or geocoded communities were used. No institutional collaboration or endorsement is implied.
+The following table records model checks and the disclosed influence sensitivity. Original main analysis records were retained. More detailed residuals, coefficient tables, package versions, bootstrap statuses and source-preservation checks are saved with the results.
 
-The manuscript draws from unchanged saved fits. The result-preservation manifest records checksums and the original commit, while the manuscript validation records consistency checks. Full regeneration of the analyses remains available through the original simulation scripts. The consolidated Word and PDF reports and Quarto source are linked at the start of the README. This report has not undergone journal peer review.
+::: {custom-style="Table Caption"}
+Table S1 Model diagnostics and influence sensitivity
+:::
+
+```{r}
+#| echo: false
+readRDS("../results/epidemiology/tables/diagnostics_flextable.rds")
+```
+
+The conditional residual quantiles assess the Gaussian working distribution after accounting for participant intercepts. The reference line aids visual assessment; it is not a formal acceptance criterion.
+
+![Figure S1 Conditional depression residual quantiles](../figures/epidemiology/05_residual_qq.png){width=6.3in}
+
+Residuals are also plotted against conditional fitted values, with antenatal and postpartum records distinguished. Systematic curvature or changing spread would indicate a need to revisit the mean or residual variance structure in real data.
+
+![Figure S2 Conditional depression residuals against fitted values](../figures/epidemiology/06_residual_fitted.png){width=6.3in}
+
+The pathway sensitivity curve shows the estimated indirect association and participant-bootstrap interval as assumed residual correlation changes. A curve that crosses zero illustrates the dependence of a mechanistic interpretation on untestable disturbance assumptions.
+
+![Figure S3 Expression pathway residual correlation sensitivity](../figures/epidemiology/08_mediation_sensitivity.png){width=6.3in}
+
+Conditional random-intercept quantiles provide an additional approximate diagnostic, recognising that these estimated intercepts are shrunken towards zero.
+
+![Figure S4 Conditional participant intercept quantiles](../figures/epidemiology/09_random_intercept_qq.png){width=6.3in}
+
+## Reproducibility and data availability
+
+All records are synthetic and already included. No downloads, credentials, ERA5 access or new cohort simulation are required for the R analysis. Run the following from the repository root after installing the listed R packages. Package versions and session information used for this release are recorded in `results/epidemiology/R_packages.csv` and `R_sessionInfo.txt`.
+
+```r
+install.packages(c("lme4", "lmerTest", "gtsummary", "flextable", "officer",
+  "sandwich", "car", "jsonlite", "broom.mixed", "ggplot2", "emmeans",
+  "lpSolve", "dplyr", "knitr", "digest", "rmarkdown"))
+```
+
+```bash
+Rscript --vanilla run_epidemiology.R
+Rscript --vanilla run_epidemiology.R --report
+```
+
+The second command additionally requires Quarto and renders the Word manuscript. A full run includes 300 participant bootstrap resamples and takes longer than the core association fits. Results are deterministic conditional on package/platform numerical behaviour and the recorded seed. The existing Python code and original outputs remain available for reproducing the historical analysis; the R command is the entry point for this epidemiological manuscript. README, tables and Quarto source are regenerated from the same fitted R results. Word-to-PDF export on Windows is available through `export_manuscript.ps1`.
+
+The analysis code is organised as preprocessing, association models, secondary analyses, tables and figures, manuscript generation and validation. `epidemiology_config.json` records the analysis version and bootstrap settings. The checked source cohort and legacy results are protected by `provenance/original_results_sha256.json`; validation permits only Git line-ending normalisation for text files. No original scientific result was overwritten by the R outputs.
 
 ## References
 
-1. Chersich MF and colleagues. Associations between high temperatures in pregnancy and risk of preterm birth, low birth weight, and stillbirths. BMJ 2020;371:m3811. https://doi.org/10.1136/bmj.m3811
-2. Solarin I and colleagues. Study protocol for the Bio-HEAT study. Wellcome Open Research 2025;10:121. https://pmc.ncbi.nlm.nih.gov/articles/PMC12209768/
-3. Vehtari A and colleagues. Rank-normalization, folding, and localization: an improved R-hat for assessing convergence of MCMC. Bayesian Analysis 2021;16:667–718. https://doi.org/10.1214/20-BA1221
-4. Bind MA and colleagues. Causal mediation analysis for longitudinal data with exogenous exposure. Biostatistics 2016;17:122–134. https://doi.org/10.1093/biostatistics/kxv029
+1. Chersich MF and colleagues. Associations between high temperatures in pregnancy and risk of preterm birth low birth weight and stillbirths. BMJ 2020;371:m3811. [Article](https://www.bmj.com/content/371/bmj.m3811).
+2. Bates D, Maechler M, Bolker B, Walker S. Fitting linear mixed effects models using lme4. Journal of Statistical Software 2015;67(1):1-48. [Article](https://doi.org/10.18637/jss.v067.i01).
+3. Kuznetsova A, Brockhoff PB, Christensen RHB. lmerTest package tests in linear mixed effects models. Journal of Statistical Software 2017;82(13):1-26. [Article](https://doi.org/10.18637/jss.v082.i13).
+4. VanderWeele TJ, Vansteelandt S, Robins JM. Effect decomposition in the presence of an exposure induced mediator outcome confounder. Epidemiology 2014;25(2):300-306. [Article](https://doi.org/10.1097/EDE.0000000000000034).
+

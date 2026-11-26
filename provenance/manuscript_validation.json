@@ -1,14 +1,9 @@
 {
-  "status": "PASS",
-  "original_result_files_unchanged": 55,
-  "participants": 600,
-  "visits": 2400,
-  "complications": 86,
-  "figures_in_readme": 5,
-  "manuscript_structure": true,
-  "all_three_diagnostic_sets_pass": true,
-  "posterior_predictive_summaries_checked": 15,
-  "spatial_analysis_added": false,
-  "scope": "Saved-result manuscript revision; no posterior resampling",
-  "text_files_matching_after_line_ending_normalisation": []
+  "status": "passed",
+  "source_files_preserved": 55,
+  "native_word_tables": 8,
+  "word_figures": 9,
+  "native_equations": 29,
+  "README_figures": 9,
+  "visual_quality_assurance": "See epidemiology_quality_assurance.json after render review"
 }

@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "women": 600,
+  "visits": 2400,
+  "events": 86,
+  "original_scientific_files_checked": 55,
+  "original_files_preserved": true,
+  "primary_interval_reproduced": true,
+  "logistic_separation_toy_checks": "complete quasi and overlap passed",
+  "exposure_reconstruction": "80 windows checked",
+  "figures": 9,
+  "tables": 8,
+  "bootstrap_valid": 300
+}

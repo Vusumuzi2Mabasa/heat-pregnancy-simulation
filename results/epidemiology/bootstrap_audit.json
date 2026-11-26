@@ -1,0 +1,10 @@
+{
+  "seed": 261126,
+  "requested": 300,
+  "valid": 300,
+  "failed": 0,
+  "nonconverged": 0,
+  "singular": 0,
+  "resampling_unit": "Woman with all four visits; duplicate draws receive distinct new identifiers",
+  "interpretation": "Exploratory linear path decomposition; not proof of a causal mechanism"
+}

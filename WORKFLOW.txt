@@ -1,0 +1,12 @@
+Heat pregnancy applied epidemiology workflow
+All data are synthetic. Author Vusumuzi Mabasa.
+1. Preserve original cohort and Bayesian results; audit identifiers, visits, timing, coding and exposure reconstruction.
+2. Fit participant random intercept models for depression, vascular and anxiety outcomes; estimate mean differences per 5 degrees C.
+3. Analyse the generic pregnancy complication with logistic regression and HC3 odds ratio confidence intervals; exclude postpartum measurements.
+4. Diagnose model fit and functional forms; assess antenatal-only and within-person specifications.
+5. Explore genotype and phase modification and an expression path decomposition with 300 participant bootstrap resamples.
+6. Generate ggplot figures, gtsummary and flextable tables, README and Quarto Word manuscript.
+7. Validate cohort counts, estimators and preservation hashes.
+Run: Rscript --vanilla run_epidemiology.R --report
+PDF on Windows: pwsh -File export_manuscript.ps1 -DocumentPath <absolute docx> -PdfPath <absolute pdf>
+Full methodology, equations and limitations are in the README and Word manuscript.
