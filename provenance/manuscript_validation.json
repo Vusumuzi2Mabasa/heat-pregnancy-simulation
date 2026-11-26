@@ -9,5 +9,6 @@
   "all_three_diagnostic_sets_pass": true,
   "posterior_predictive_summaries_checked": 15,
   "spatial_analysis_added": false,
-  "scope": "Saved-result manuscript revision; no posterior resampling"
+  "scope": "Saved-result manuscript revision; no posterior resampling",
+  "text_files_matching_after_line_ending_normalisation": []
 }

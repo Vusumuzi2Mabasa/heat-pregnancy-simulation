@@ -17,4 +17,8 @@ if not p.exists():
  shutil.copy2(ROOT/'output/pdf/heat_pregnancy_simulation_report.pdf',original/'heat_pregnancy_simulation_report_before_manuscript.pdf')
 data=json.loads(p.read_text());failed=[name for name,sha in data['files'].items() if digest(ROOT/name)!=sha]
 assert not failed,failed
+if 'canonical_text_sha256' not in data:
+ data['canonical_text_sha256']={name:hashlib.sha256((ROOT/name).read_bytes().replace(b'\r\n',b'\n')).hexdigest() for name in data['files'] if Path(name).suffix in ['.csv','.json']}
+ data['text_portability']='Canonical text hashes ignore only CRLF versus LF conversion by Git; binary files require exact bytes'
+ p.write_text(json.dumps(data,indent=2))
 print('Original result files preserved:',len(data['files']))
