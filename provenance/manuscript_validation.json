@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "original_result_files_unchanged": 55,
+  "participants": 600,
+  "visits": 2400,
+  "complications": 86,
+  "figures_in_readme": 5,
+  "manuscript_structure": true,
+  "all_three_diagnostic_sets_pass": true,
+  "posterior_predictive_summaries_checked": 15,
+  "spatial_analysis_added": false,
+  "scope": "Saved-result manuscript revision; no posterior resampling"
+}
